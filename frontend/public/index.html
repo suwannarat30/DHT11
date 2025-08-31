@@ -275,7 +275,10 @@
   </div>
 
 <script>
-  const API = `${location.protocol}//${location.hostname}:5002`;
+  // ใช้ /api เมื่อรันบน Vercel (ต้องมี vercel.json rewrites), ถ้าโลคัลใช้พอร์ต 5002
+  const API = /\.vercel\.app$/.test(location.hostname)
+    ? "/api"
+    : `${location.protocol}//${location.hostname}:5002`;
 
   function pad2(n){ return String(n).padStart(2,"0"); }
   function updateClock(){

@@ -1,0 +1,18 @@
+{
+  "name": "weather-backend",
+  "version": "1.1.0",
+  "description": "Weather backend: Open-Meteo -> MongoDB -> API for iOS-like UI",
+  "main": "be.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node be.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

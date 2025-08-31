@@ -1,0 +1,13 @@
+{
+  "name": "weather-frontend",
+  "version": "1.1.0",
+  "description": "Weather frontend: iOS-like UI calling backend",
+  "main": "fe.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node fe.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

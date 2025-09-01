@@ -60,8 +60,6 @@
     }
 
     /* ---------- SKY SPRITES PER THEME ---------- */
-
-    /* กลางคืน: เนบิวล่าพลิ้ว + ดาวจำนวนมากระยิบระยับ + พารัลแลกซ์เล็กน้อย */
     body[data-theme="dark"]::before{
       content:"";
       position: fixed;
@@ -81,7 +79,6 @@
       position: fixed;
       inset:-2% -2% -2% -2%;
       pointer-events:none;
-      /* สร้างดาวสองชั้น (เม็ดเล็ก/ใหญ่) หลายจุด */
       background-image:
         radial-gradient(1px 1px at 5% 12%,  rgba(255,255,255,.95) 0, transparent 2px),
         radial-gradient(1.2px 1.2px at 12% 32%, rgba(255,255,255,.85) 0, transparent 2.2px),
@@ -95,7 +92,6 @@
         radial-gradient(1px 1px at 74% 40%, rgba(255,255,255,.95) 0, transparent 2px),
         radial-gradient(1.4px 1.4px at 82% 72%, rgba(255,255,255,.9) 0, transparent 2.4px),
         radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,.85) 0, transparent 2px),
-
         radial-gradient(2px 2px at 8% 55%,   rgba(255,255,255,.6) 0, transparent 3px),
         radial-gradient(2px 2px at 26% 12%,  rgba(255,255,255,.6) 0, transparent 3px),
         radial-gradient(2px 2px at 38% 46%,  rgba(255,255,255,.6) 0, transparent 3px),
@@ -106,39 +102,30 @@
       animation: twinkle 2.8s ease-in-out infinite alternate, starDrift 60s linear infinite;
     }
 
-    /* --------- โหมดกลางวัน (LIGHT): เมฆสีขาวแบบไดนามิก เลเยอร์หลังสุด --------- */
+    /* --------- โหมดกลางวัน (LIGHT) --------- */
     body[data-theme="light"]::before{
       content:"";
       position: fixed;
       inset:-10% -10% -5% -10%;
       pointer-events:none;
-      /* เมฆ 3 ชั้น (ก้อนนุ่ม) */
       background:
-        /* ชั้นไกล */
         radial-gradient(90px 45px at 10% 18%, rgba(255,255,255,.45) 60%, rgba(255,255,255,0) 61%),
         radial-gradient(120px 60px at 16% 20%, rgba(255,255,255,.45) 60%, rgba(255,255,255,0) 61%),
         radial-gradient(100px 50px at 22% 18%, rgba(255,255,255,.45) 60%, rgba(255,255,255,0) 61%),
-
-        /* ชั้นกลาง */
         radial-gradient(120px 60px at 50% 22%, rgba(255,255,255,.55) 60%, rgba(255,255,255,0) 61%),
         radial-gradient(140px 70px at 58% 24%, rgba(255,255,255,.55) 60%, rgba(255,255,255,0) 61%),
         radial-gradient(110px 55px at 66% 22%, rgba(255,255,255,.55) 60%, rgba(255,255,255,0) 61%),
-
-        /* ชั้นใกล้ */
         radial-gradient(150px 80px at 78% 34%, rgba(255,255,255,.65) 60%, rgba(255,255,255,0) 61%),
         radial-gradient(170px 90px at 88% 36%, rgba(255,255,255,.65) 60%, rgba(255,255,255,0) 61%),
         radial-gradient(130px 70px at 70% 38%, rgba(255,255,255,.65) 60%, rgba(255,255,255,0) 61%);
       filter: blur(0.3px);
       animation: cloudsDrift 60s linear infinite;
       opacity:.9;
-      z-index:0; /* หลังสุดใต้คอนเทนต์ */
+      z-index:0;
     }
     body[data-theme="light"]::after{ content:none; }
 
-    .wrap{
-      max-width:960px; margin:0 auto; padding:18px;
-      position:relative; z-index:1; /* คอนเทนต์ต้องอยู่เหนือท้องฟ้าเสมอ */
-    }
+    .wrap{ max-width:960px; margin:0 auto; padding:18px; position:relative; z-index:1; }
     .top{padding:18px 8px 8px; text-align:center}
     .city{font-size:1.6rem; letter-spacing:.5px}
     .temp{font-size:6rem; font-weight:200; margin:.2rem 0}
@@ -167,59 +154,27 @@
     .daily{ display:flex; flex-direction:column; gap:8px; padding:6px }
     .drow{
       display:grid;
-      /* ชื่อวัน | Tmin | แถบอุณหภูมิ | Tmax | %ฝน(+อีโมจิ) */
       grid-template-columns: 64px 56px 1fr 56px 72px;
-      align-items:center;
-      gap:8px;
+      align-items:center; gap:8px;
     }
-    .pop{
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:6px;
-    }
-    .d-min{ text-align:right;  opacity:.95; }
-    .d-max{ text-align:left;   opacity:.95; }
-    .d-name{ color: var(--text); opacity:.95 }   /* ใช้สีตามธีม */
+    .pop{ display:flex; align-items:center; justify-content:flex-end; gap:6px; }
+    .d-min{ text-align:right; opacity:.95; }
+    .d-max{ text-align:left;  opacity:.95; }
+    .d-name{ color:var(--text); opacity:.95 }
 
-    .bar{
-      position:relative; height:8px; background:rgba(255,255,255,.12); border-radius:999px; overflow:hidden;
-    }
-    .bar-fill{
-      position:absolute; height:100%; background:#f39c12; border-radius:999px;
-    }
+    .bar{ position:relative; height:8px; background:rgba(255,255,255,.12); border-radius:999px; overflow:hidden; }
+    .bar-fill{ position:absolute; height:100%; background:#f39c12; border-radius:999px; }
     .muted{ color:var(--muted) }
     .forecast-note{ text-align:center; margin:10px 0 0; color:var(--muted) }
     .footer{ text-align:center; color:var(--muted); margin:16px 0 8px }
 
-    /* keyframes */
-    @keyframes drift{
-      0%   { background-position: 0% 0%, 0% 0%; }
-      50%  { background-position: 100% 50%, 0% 0%; }
-      100% { background-position:   0% 0%, 0% 0%; }
-    }
-    @keyframes float1{
-      0%   { transform: translate(-4%, -2%) scale(1);   opacity:.85; }
-      100% { transform: translate( 8%,  4%) scale(1.12); opacity:1; }
-    }
-    @keyframes twinkle{
-      0%,100% { opacity: calc(var(--stars-opacity) * .6); }
-      50%     { opacity: calc(var(--stars-opacity) * 1.0); }
-    }
-    @keyframes starDrift{
-      0%   { transform: translate3d(-1%,0,0); }
-      100% { transform: translate3d( 1%,0,0); }
-    }
-    @keyframes sunFloat{
-      0%   { transform: translate3d(-1%, -1%, 0) scale(1);   }
-      100% { transform: translate3d( 2%,  2%, 0) scale(1.04); }
-    }
-    @keyframes cloudsDrift{
-      0%   { transform: translate3d(-4%,0,0); }
-      100% { transform: translate3d( 4%,0,0); }
-    }
+    @keyframes drift{ 0%{background-position:0% 0%,0% 0%} 50%{background-position:100% 50%,0% 0%} 100%{background-position:0% 0%,0% 0%}}
+    @keyframes float1{ 0%{transform:translate(-4%,-2%) scale(1);opacity:.85} 100%{transform:translate(8%,4%) scale(1.12);opacity:1}}
+    @keyframes twinkle{ 0%,100%{opacity:calc(var(--stars-opacity)*.6)} 50%{opacity:calc(var(--stars-opacity)*1)}}
+    @keyframes starDrift{ 0%{transform:translate3d(-1%,0,0)} 100%{transform:translate3d(1%,0,0)}}
+    @keyframes sunFloat{ 0%{transform:translate3d(-1%,-1%,0) scale(1)} 100%{transform:translate3d(2%,2%,0) scale(1.04)}}
+    @keyframes cloudsDrift{ 0%{transform:translate3d(-4%,0,0)} 100%{transform:translate3d(4%,0,0)}}
 
-    /* ====== เพิ่มตามที่ขอ (คงเดิมจากเวอร์ชั่นก่อน) ====== */
     body[data-theme="light"] .d-name{ color:#000; }
     body[data-theme="light"] .toolbar label{ color:#000; }
     body[data-theme="light"] .toolbar select{ color:#000; }
@@ -240,7 +195,6 @@
         <select id="citySel"></select>
         <button id="btnReload">โหลดข้อมูล</button>
 
-        <!-- Theme selector -->
         <label for="themeSel" class="muted">Theme</label>
         <select id="themeSel">
           <option value="auto">Auto</option>
@@ -268,11 +222,12 @@
       <p class="forecast-note"></p>
     </div>
 
-    <div class="footer">แหล่งข้อมูล: Open-Meteo • Dev by Sunisa & Adil</div>
+    <div class="footer">แหล่งข้อมูล: OpenWeather • Dev by Sunisa & Adil</div>
   </div>
 
 <script>
-  /* ==== ใช้ Open-Meteo ตรงจากเบราว์เซอร์ (ไม่มี backend) ==== */
+  /* ==== ตั้งค่า OpenWeather ==== */
+  const OW_KEY = 'PASTE_YOUR_OPENWEATHER_KEY_HERE'; // <- วางคีย์ของคุณที่นี่
 
   function pad2(n){ return String(n).padStart(2,"0"); }
   function updateClock(){
@@ -291,7 +246,6 @@
     const m = mode || "auto";
     localStorage.setItem("themeMode", m);
     if (themeTimer){ clearInterval(themeTimer); themeTimer = null; }
-
     if (m === "light" || m === "dark"){
       document.body.setAttribute("data-theme", m);
     } else {
@@ -301,7 +255,7 @@
     }
   }
 
-  // ====== STATIC CITIES (แทน /api/cities) ======
+  // ====== STATIC CITIES ======
   const CITY_COORDS = {
     bangkok:      { nameTH: "กรุงเทพฯ",  latitude: 13.7563, longitude: 100.5018 },
     "chiang mai": { nameTH: "เชียงใหม่", latitude: 18.7883, longitude: 98.9853 },
@@ -312,7 +266,6 @@
     const k = (key || "bangkok").toLowerCase().trim();
     return CITY_COORDS[k] ? { key:k, ...CITY_COORDS[k] } : { key:"bangkok", ...CITY_COORDS["bangkok"] };
   }
-
   async function loadCities(){
     const sel = document.getElementById("citySel");
     sel.innerHTML = "";
@@ -335,27 +288,26 @@
     });
   }
 
-  function wmoToShortTH(code){
-    const c=Number(code);
-    if (c===0) return "แจ่มใส";
-    if (c===1) return "มีเมฆบางส่วน";
-    if (c===2) return "เมฆเป็นส่วนมาก";
-    if (c===3) return "มีเมฆมาก";
-    if ([51,53,55,61,63,65,80,81,82].includes(c)) return "ฝนตก";
-    if ([95,96,99].includes(c)) return "พายุฝนฟ้าคะนอง";
-    if ([45,48].includes(c)) return "มีหมอก";
-    if ([71,73,75,77,85,86].includes(c)) return "หิมะตก";
+  function owToShortTH(id){
+    const n = Number(id)||800;
+    if (n === 800) return "แจ่มใส";
+    if (n >= 200 && n <= 232) return "พายุฝนฟ้าคะนอง";
+    if (n >= 300 && n <= 321) return "ฝนปรอย";
+    if (n >= 500 && n <= 531) return "ฝนตก";
+    if (n >= 600 && n <= 622) return "หิมะตก";
+    if (n >= 701 && n <= 781) return "หมอก/ฝุ่น";
+    if (n >= 801 && n <= 804) return "มีเมฆ";
     return "สภาพอากาศ";
   }
-  function wmoToEmoji(code){
-    const c=Number(code);
-    if (c === 0) return "☀️";
-    if ([1,2].includes(c)) return "⛅️";
-    if (c === 3) return "☁️";
-    if ([51,53,55,61,63,65,80,81,82].includes(c)) return "🌧️";
-    if ([95,96,99].includes(c)) return "⛈️";
-    if ([45,48].includes(c)) return "🌫️";
-    if ([71,73,75,77,85,86].includes(c)) return "❄️";
+  function owToEmoji(id){
+    const n = Number(id)||800;
+    if (n === 800) return "☀️";
+    if (n >= 200 && n <= 232) return "⛈️";
+    if (n >= 300 && n <= 321) return "🌦️";
+    if (n >= 500 && n <= 531) return "🌧️";
+    if (n >= 600 && n <= 622) return "❄️";
+    if (n >= 701 && n <= 781) return "🌫️";
+    if (n >= 801 && n <= 804) return "⛅️";
     return "🌡️";
   }
 
@@ -385,34 +337,62 @@
     return "☀️";
   }
 
-  // แปลงผล Open-Meteo ให้เป็นโครงเดียวกับเดิม
-  function shapeResponse(cityInfo, raw){
-    const current = raw.current || {};
-    const hourly = raw.hourly || {};
-    const daily  = raw.daily  || {};
+  // ====== ดึงจาก OpenWeather แล้วแปลงโครง ======
+  async function fetchOpenWeather(cityInfo){
+    const { latitude:lat, longitude:lon } = cityInfo;
+    const curURL = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=th&appid=${OW_KEY}`;
+    const fcURL  = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=th&appid=${OW_KEY}`;
 
-    const hourlyArr = (hourly.time || []).map((t,i)=>({
-      time: t,
-      temp: hourly.temperature_2m?.[i] ?? null,
-      precip_prob: hourly.precipitation_probability?.[i] ?? null,
-      wmo: hourly.weather_code?.[i] ?? null,
-      icon: wmoToEmoji(hourly.weather_code?.[i]),
-    })).slice(0,72);
+    const [curRes, fcRes] = await Promise.all([fetch(curURL), fetch(fcURL)]);
+    if(!curRes.ok) throw new Error(`OpenWeather current error ${curRes.status}`);
+    if(!fcRes.ok) throw new Error(`OpenWeather forecast error ${fcRes.status}`);
 
-    const dailyArr = (daily.time || []).slice(0,10).map((dStr,i)=>({
-      date: dStr,
-      tmin: daily.temperature_2m_min?.[i] ?? null,
-      tmax: daily.temperature_2m_max?.[i] ?? null,
-      precip_prob_max: daily.precipitation_probability_max?.[i] ?? null
+    const cur = await curRes.json();
+    const fc  = await fcRes.json();
+
+    // current
+    const curId = cur.weather?.[0]?.id ?? 800;
+    const current = {
+      temp: cur.main?.temp ?? null,
+      windspeed: ((cur.wind?.speed ?? 0) * 3.6), // m/s -> km/h
+      owId: curId,
+      icon: owToEmoji(curId),
+      desc_th: cur.weather?.[0]?.description || owToShortTH(curId),
+      time_utc: new Date((cur.dt ?? Date.now())*1000).toISOString(),
+    };
+
+    // hourly (ใช้ 3-hour step จาก forecast เอา 24 ชม.ข้างหน้า = 8 ชิ้น)
+    const hourlyArr = (fc.list || []).slice(0, 16).map(it => ({
+      time: it.dt_txt,
+      temp: it.main?.temp ?? null,
+      precip_prob: Math.round((it.pop ?? 0) * 100),
+      owId: it.weather?.[0]?.id ?? 800,
+      icon: owToEmoji(it.weather?.[0]?.id ?? 800),
     }));
 
-    const alertHeavyRain = (daily.precipitation_probability_max || []).some(v => (v ?? 0) > 60);
+    // group รายวัน (ประมาณ 5 วัน จาก 3-hr list)
+    const dayMap = {};
+    for (const it of (fc.list || [])){
+      const date = (it.dt_txt||"").slice(0,10);
+      if(!date) continue;
+      const tmin = it.main?.temp_min;
+      const tmax = it.main?.temp_max;
+      const pop  = Math.round((it.pop ?? 0) * 100);
+      if(!dayMap[date]){
+        dayMap[date] = { date, tmin: tmin, tmax: tmax, precip_prob_max: pop };
+      } else {
+        if (tmin!=null && (dayMap[date].tmin==null || tmin < dayMap[date].tmin)) dayMap[date].tmin = tmin;
+        if (tmax!=null && (dayMap[date].tmax==null || tmax > dayMap[date].tmax)) dayMap[date].tmax = tmax;
+        if (pop > (dayMap[date].precip_prob_max ?? 0)) dayMap[date].precip_prob_max = pop;
+      }
+    }
+    const dailyArr = Object.values(dayMap).sort((a,b)=>a.date.localeCompare(b.date)).slice(0, 7);
 
+    const alertHeavyRain = dailyArr.some(d => (d.precip_prob_max ?? 0) > 60);
     let nextRainTime = null;
-    for (let i=0; i<(hourly.precipitation_probability||[]).length; i++){
-      const p = hourly.precipitation_probability[i];
-      const t = hourly.time[i];
-      if ((p ?? 0) >= 40){ nextRainTime = t; break; }
+    for (const it of (fc.list || [])){
+      const pop = (it.pop ?? 0);
+      if (pop >= 0.4){ nextRainTime = it.dt_txt; break; }
     }
 
     return {
@@ -420,46 +400,31 @@
       city_name_th: cityInfo.nameTH,
       latitude: cityInfo.latitude,
       longitude: cityInfo.longitude,
-      current: {
-        temp: current.temperature_2m ?? null,
-        windspeed: current.wind_speed_10m ?? null,
-        wmo: current.weather_code ?? null,
-        icon: wmoToEmoji(current.weather_code),
-        desc_th: wmoToShortTH(current.weather_code),
-        time_utc: current.time ?? null
-      },
+      current,
       hourly: hourlyArr,
       daily: dailyArr,
       alert: alertHeavyRain ? "⚠️ คำเตือนเรื่องฝนตกหนัก" : null,
       next_rain_time: nextRainTime,
-      provider: "open-meteo"
+      provider: "openweather"
     };
   }
 
-  // ====== LOAD WEATHER (เรียก Open-Meteo ตรง) ======
+  // ====== LOAD WEATHER ======
   async function loadWeather(){
     try{
+      if (!OW_KEY || OW_KEY.includes('PASTE_YOUR_OPENWEATHER_KEY_HERE')) {
+        throw new Error("ยังไม่ได้ใส่ OpenWeather API key ในตัวแปร OW_KEY");
+      }
       const cityKey = document.getElementById("citySel").value || "bangkok";
       const cityInfo = getCityInfo(cityKey);
 
-      const url = new URL("https://api.open-meteo.com/v1/forecast");
-      url.searchParams.set("latitude", cityInfo.latitude);
-      url.searchParams.set("longitude", cityInfo.longitude);
-      url.searchParams.set("current", "temperature_2m,weather_code,wind_speed_10m");
-      url.searchParams.set("hourly", "temperature_2m,precipitation_probability,weather_code");
-      url.searchParams.set("daily", "temperature_2m_max,temperature_2m_min,precipitation_probability_max");
-      url.searchParams.set("timezone", "auto");
-
-      const res = await fetch(url.toString());
-      if(!res.ok) throw new Error(`Open-Meteo error ${res.status}`);
-      const raw = await res.json();
-
-      const d = shapeResponse(cityInfo, raw);
+      const d = await fetchOpenWeather(cityInfo);
 
       // ส่วนหัว
       document.getElementById("city").textContent = d.city_name_th;
       document.getElementById("temp").textContent = Math.round(d.current.temp ?? 0);
-      document.getElementById("desc").textContent = `${wmoToShortTH(d.current.wmo)} • ลม ${Math.round(d.current.windspeed ?? 0)} km/h`;
+      document.getElementById("desc").textContent =
+        `${owToShortTH(d.current.owId)} • ลม ${Math.round(d.current.windspeed ?? 0)} km/h`;
 
       // กล่องเตือน
       const alertBox = document.getElementById("alertBox");
@@ -488,37 +453,24 @@
       const now = new Date();
       const nowHour = new Date(now); nowHour.setMinutes(0,0,0);
 
-      const idxNowHour = hours.findIndex(h => h.dt.getTime() === nowHour.getTime());
-      const nowPop = idxNowHour >= 0 ? (hours[idxNowHour].precip_prob ?? 0) : 0;
-
-      // การ์ดแรก: "ตอนนี้"
+      // การ์ดแรก: "ตอนนี้" (ไม่มี POP ปัจจุบันจาก current ให้ดึงจากชิ้นแรกแทนถ้ามี)
+      const nowPop = hours.length ? (hours[0].precip_prob ?? 0) : 0;
       addCard(hWrap, "ตอนนี้", d.current.icon, d.current.temp, nowPop);
 
-      // เริ่มจากชั่วโมงถัดไป 24 ชั่วโมง
-      const nextHour = new Date(nowHour); nextHour.setHours(nextHour.getHours()+1);
-      let startIdx = hours.findIndex(h => h.dt.getTime() === nextHour.getTime());
-      if (startIdx === -1) startIdx = hours.findIndex(h => h.dt.getTime() >= nextHour.getTime());
-
-      if (startIdx >= 0) {
-        const maxCards = 24;
-        for (let i = 0; i < maxCards && (startIdx + i) < hours.length; i++) {
-          const h = hours[startIdx + i];
-          addCard(hWrap, hourLabel(h.dt), h.icon, h.temp, h.precip_prob);
-        }
-      } else {
-        hours.slice(0, 24).forEach(h => {
-          addCard(hWrap, hourLabel(h.dt), h.icon, h.temp, h.precip_prob);
-        });
+      // โชว์ 24 ชั่วโมงถัดไป (จาก 3 ชม./ชิ้น = 8 ชิ้น)
+      for (let i = 0; i < 8 && i < hours.length; i++){
+        const h = hours[i];
+        addCard(hWrap, hourLabel(h.dt), h.icon, h.temp, h.precip_prob);
       }
 
-      // ===== รายวัน 7 วัน: วันนี้ + ถัดไปอีก 7 วัน (รวม 8 วัน) =====
+      // ===== รายวัน 7 วัน (ประมาณจาก forecast) =====
       const today = new Date();
       const todayStr = `${today.getFullYear()}-${pad2(today.getMonth()+1)}-${pad2(today.getDate())}`;
 
       let dayStartIdx = d.daily.findIndex(day => day.date === todayStr);
       if (dayStartIdx === -1) dayStartIdx = 0;
 
-      const showDays = d.daily.slice(dayStartIdx, dayStartIdx + 8);
+      const showDays = d.daily.slice(dayStartIdx, dayStartIdx + 7);
       const dailyBars = buildDailyBars(showDays);
 
       const dWrap = document.getElementById("daily");
@@ -552,7 +504,6 @@
   (async ()=>{
     await loadCities();
 
-    // init theme
     const themeSel = document.getElementById("themeSel");
     const savedMode = localStorage.getItem("themeMode") || "auto";
     themeSel.value = savedMode;

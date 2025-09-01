@@ -110,7 +110,14 @@
     .h-pop{ color:var(--muted); font-size:.9rem }
 
     .daily{ display:flex; flex-direction:column; gap:8px; padding:6px }
-    .drow{ display:grid; grid-template-columns: 64px 56px 1fr 56px 72px; align-items:center; gap:8px; }
+    /* ชื่อวัน | Tmin | แถบ temp | Tmax | อีโมจิ(คงที่) | %ฝน */
+    .drow{
+      display:grid;
+      grid-template-columns: 64px 56px 1fr 56px 36px 56px;
+      align-items:center;
+      gap:8px;
+    }
+    .emo{ text-align:center; font-size:1.1rem; }
     .pop{ display:flex; align-items:center; justify-content:flex-end; gap:6px; }
     .d-min{text-align:right;opacity:.95} .d-max{text-align:left;opacity:.95} .d-name{color:var(--text);opacity:.95}
     .bar{ position:relative; height:8px; background:rgba(255,255,255,.12); border-radius:999px; overflow:hidden; }
@@ -381,13 +388,16 @@
     bars.forEach(day=>{
       const isToday=day.key===todayKey;
       const wd=isToday?"วันนี้":day.dateObj.toLocaleDateString("th-TH",{weekday:"short"});
+      const emoji = popEmoji(Math.round(day.popAvg??0)); // ใช้ emoji ตาม %ฝนเหมือนเดิม
+
       const row=document.createElement("div"); row.className="drow";
       row.innerHTML=`
         <div class="d-name">${wd}</div>
         <div class="d-min">${Math.round(day.tmin)}°</div>
         <div class="bar"><div class="bar-fill" style="left:${day.left}%;width:${day.width}%"></div></div>
         <div class="d-max">${Math.round(day.tmax)}°</div>
-        <div class="pop muted"><span>${popEmoji(Math.round(day.popAvg??0))}</span><span>${Math.round(day.popAvg??0)}%</span></div>
+        <div class="emo">${emoji}</div>
+        <div class="pop muted"><span>${Math.round(day.popAvg??0)}%</span></div>
       `;
       dWrap.appendChild(row);
     });

@@ -1,223 +1,188 @@
 // be.js
-// Backend: ดึงอากาศจาก Open-Meteo → ส่งต่อให้ frontend และบันทึกสรุปลง MongoDB
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+require('dotenv').config();
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const { setTimeout: sleep } = require('timers/promises');
 
+// node-fetch v3 (ESM) ใน CommonJS: ใช้ dynamic import
+const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
+
+/* --------------------- App & IO --------------------- */
 const app = express();
-app.use(cors());
+app.use(cors({ origin: '*', methods: ['GET', 'POST'] })); // TODO: โปรดจำกัด origin ในโปรดักชัน
 app.use(express.json());
 
-// ==== Config ====
-const PORT = Number(process.env.PORT) || 5000;
-const MONGO_URI = process.env.MONGO_URI || "mongodb://root:password@localhost:27017/?authSource=admin";
-const DB_NAME = process.env.DB_NAME || "weather";
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: '*', methods: ['GET', 'POST'] },
+});
 
-// ==== เมืองตัวอย่าง ====
-const CITY_COORDS = {
-  bangkok:      { nameTH: "กรุงเทพฯ",   latitude: 13.7563, longitude: 100.5018 },
-  "chiang mai": { nameTH: "เชียงใหม่",  latitude: 18.7883, longitude: 98.9853 },
-  phuket:       { nameTH: "ภูเก็ต",     latitude: 7.8804,  longitude: 98.3923 },
-  "khon kaen":  { nameTH: "ขอนแก่น",   latitude: 16.4419, longitude: 102.8350 }
-};
+/* --------------------- ENV & Validation --------------------- */
+const {
+  PORT = '5000',
+  MONGO_URL,
+  LAT = '13.7563',
+  LON = '100.5018',
+  POLL_INTERVAL_SECONDS = '60',
+  API_KEY, // OpenWeatherMap API key
+  KEEP_DAYS = '14', // เก็บข้อมูลย้อนหลังกี่วัน (TTL)
+  REQUEST_TIMEOUT_MS = '8000', // timeout เรียก API ภายนอก
+  MAX_RETRIES = '3', // retry ถ้าเรียก API ล้มเหลว
+} = process.env;
 
-// ==== Mongo Model ====
-const observationSchema = new mongoose.Schema({
-  city: String,
-  latitude: Number,
-  longitude: Number,
-  temp: Number,
-  windspeed: Number,
-  provider_time_utc: String,
-  fetched_at: { type: Date, default: Date.now }
-}, { collection: "observations" });
+const pollSec = Number(POLL_INTERVAL_SECONDS);
+const keepDays = Number(KEEP_DAYS);
+const reqTimeout = Number(REQUEST_TIMEOUT_MS);
+const maxRetries = Number(MAX_RETRIES);
 
-const Observation = mongoose.model("Observation", observationSchema);
+if (!MONGO_URL) throw new Error('Missing MONGO_URL in environment variables.');
+if (!API_KEY) throw new Error('Missing API_KEY in environment variables.');
+if (!(pollSec > 0)) throw new Error('Invalid POLL_INTERVAL_SECONDS.');
+if (!(keepDays > 0)) throw new Error('Invalid KEEP_DAYS.');
+if (!(reqTimeout >= 1000)) throw new Error('Invalid REQUEST_TIMEOUT_MS.');
+if (!(maxRetries >= 0)) throw new Error('Invalid MAX_RETRIES.');
 
-// ==== Connect Mongo ====
-(async () => {
+/* --------------------- MongoDB --------------------- */
+mongoose
+  .connect(MONGO_URL)
+  .then(() => console.log('MongoDB connected'))
+  .catch((err) => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
+
+const WeatherSchema = new mongoose.Schema(
+  {
+    timestamp: { type: Date, default: Date.now, index: true },
+    temperature: Number,
+    windspeed: Number,
+    winddirection: Number,
+    weathercode: Number,
+    raw: Object,
+  },
+  { versionKey: false }
+);
+
+// TTL index: ลบเอกสารอัตโนมัติเมื่อครบ KEEP_DAYS
+WeatherSchema.index({ timestamp: 1 }, { expireAfterSeconds: keepDays * 24 * 60 * 60 });
+
+const Weather = mongoose.model('Weather', WeatherSchema);
+
+/* --------------------- Helpers --------------------- */
+async function fetchWithTimeout(url, timeoutMs) {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    await mongoose.connect(MONGO_URI, { dbName: DB_NAME });
-    console.log("✅ Connected to MongoDB");
-  } catch (err) {
-    console.error("❌ Mongo connection error:", err.message);
+    const res = await fetch(url, { signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+/* --------------------- Polling --------------------- */
+async function fetchAndSaveAndEmit({ lat, lon, apiKey }) {
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${encodeURIComponent(
+    lat
+  )}&lon=${encodeURIComponent(lon)}&appid=${encodeURIComponent(apiKey)}&units=metric`;
+
+  let attempt = 0;
+  while (true) {
+    try {
+      const res = await fetchWithTimeout(url, reqTimeout);
+      if (!res.ok) {
+        const errorText = await res.text().catch(() => '');
+        throw new Error(`Weather API error ${res.status}: ${errorText.slice(0, 300)}`);
+      }
+
+      const data = await res.json();
+
+      const doc = new Weather({
+        timestamp: new Date(),
+        temperature: data?.main?.temp ?? null,
+        windspeed: data?.wind?.speed ?? null,
+        winddirection: data?.wind?.deg ?? null,
+        weathercode: data?.weather?.[0]?.id ?? null,
+        raw: data,
+      });
+
+      await doc.save();
+      console.log(
+        `[weather] ${doc.timestamp.toISOString()} temp=${doc.temperature}C wind=${doc.windspeed}m/s`
+      );
+
+      io.emit('weather_update', {
+        _id: doc._id,
+        timestamp: doc.timestamp,
+        temperature: doc.temperature,
+        windspeed: doc.windspeed,
+        winddirection: doc.winddirection,
+        weathercode: doc.weathercode,
+      });
+
+      return; // success
+    } catch (err) {
+      attempt += 1;
+      const retrying = attempt <= maxRetries;
+      console.error(
+        `fetchAndSaveAndEmit error (attempt ${attempt}/${maxRetries}) -> ${err.message}${
+          retrying ? ' | retrying...' : ''
+        }`
+      );
+      if (!retrying) return;
+
+      // exponential backoff with jitter
+      const delayMs = Math.min(30000, 500 * 2 ** (attempt - 1)) + Math.floor(Math.random() * 500);
+      await sleep(delayMs);
+    }
+  }
+}
+
+/* --------------------- Scheduler --------------------- */
+const poll = () => fetchAndSaveAndEmit({ lat: LAT, lon: LON, apiKey: API_KEY });
+
+// run immediately, then interval
+poll();
+const interval = setInterval(poll, pollSec * 1000);
+
+/* --------------------- Routes --------------------- */
+app.get('/api/health', (_req, res) => res.json({ ok: true, ts: new Date() }));
+
+// optional: endpoint อ่านค่าล่าสุด (เผื่อ client ไม่ได้ใช้ socket.io)
+app.get('/api/weather/latest', async (_req, res) => {
+  try {
+    const last = await Weather.findOne().sort({ timestamp: -1 }).lean();
+    res.json({ data: last || null });
+  } catch (e) {
+    res.status(500).json({ error: 'DB error' });
+  }
+});
+
+/* --------------------- Start & Shutdown --------------------- */
+const port = Number(PORT);
+const listener = server.listen(port, (err) => {
+  if (err) {
+    console.error('Server start error:', err);
     process.exit(1);
   }
-})();
-
-// ==== Weather helpers ====
-function wmoToTextTH(code) {
-  const c = Number(code);
-  if ([0].includes(c)) return "ท้องฟ้าแจ่มใส";
-  if ([1].includes(c)) return "มีเมฆเป็นบางส่วน";
-  if ([2].includes(c)) return "เมฆเป็นส่วนมาก";
-  if ([3].includes(c)) return "มีเมฆมาก";
-  if ([45,48].includes(c)) return "มีหมอก / น้ำค้างแข็ง";
-  if ([51,53,55,61,63,65,80,81,82].includes(c)) return "ฝนตก";
-  if ([56,57,66,67].includes(c)) return "ฝนเยือกแข็ง";
-  if ([71,73,75,77,85,86].includes(c)) return "หิมะตก";
-  if ([95,96,99].includes(c)) return "พายุฝนฟ้าคะนอง";
-  return "สภาพอากาศไม่ทราบแน่ชัด";
-}
-function wmoToEmoji(code) {
-  const c = Number(code);
-  if (c === 0) return "☀️";
-  if ([1,2].includes(c)) return "⛅️";
-  if (c === 3) return "☁️";
-  if ([51,53,55,61,63,65,80,81,82].includes(c)) return "🌧️";
-  if ([95,96,99].includes(c)) return "⛈️";
-  if ([45,48].includes(c)) return "🌫️";
-  if ([71,73,75,77,85,86].includes(c)) return "❄️";
-  return "🌡️";
-}
-
-function getCityInfo(cityRaw) {
-  const key = (cityRaw || "").trim().toLowerCase();
-  return CITY_COORDS[key] ? { key, ...CITY_COORDS[key] } : { key: "bangkok", ...CITY_COORDS["bangkok"] };
-}
-
-async function fetchFromOpenMeteo({ latitude, longitude }) {
-  const url = new URL("https://api.open-meteo.com/v1/forecast");
-  url.searchParams.set("latitude", latitude);
-  url.searchParams.set("longitude", longitude);
-  url.searchParams.set("current", "temperature_2m,weather_code,wind_speed_10m");
-  url.searchParams.set("hourly", "temperature_2m,precipitation_probability,weather_code");
-  url.searchParams.set("daily", "temperature_2m_max,temperature_2m_min,precipitation_probability_max");
-  url.searchParams.set("timezone", "auto");
-
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(`Open-Meteo error ${res.status}`);
-  return res.json();
-}
-
-function shapeResponse(cityInfo, raw) {
-  const current = raw.current || {};
-  const hourly = raw.hourly || {};
-  const daily  = raw.daily  || {};
-
-  // เดิม (ลบออก)
-// const hourlyArr = [];
-// const lenH = Math.min(24, (hourly.time || []).length);
-// for (let i = 0; i < lenH; i++) {
-//   hourlyArr.push({
-//     time: hourly.time[i],
-//     temp: hourly.temperature_2m?.[i] ?? null,
-//     precip_prob: hourly.precipitation_probability?.[i] ?? null,
-//     wmo: hourly.weather_code?.[i] ?? null,
-//     icon: wmoToEmoji(hourly.weather_code?.[i])
-//   });
-// }
-
-// ใหม่ (ใส่แทน)
-const hourlyArr = (hourly.time || []).map((t, i) => ({
-  time: t,
-  temp: hourly.temperature_2m?.[i] ?? null,
-  precip_prob: hourly.precipitation_probability?.[i] ?? null,
-  wmo: hourly.weather_code?.[i] ?? null,
-  icon: wmoToEmoji(hourly.weather_code?.[i]),
-})).slice(0, 72); // เผื่อ 72 ชม. (พอสำหรับ "ตอนนี้" + 24 ชม. ข้ามเที่ยงคืน)
-
-
-  const dailyArr = [];
-  const lenD = Math.min(10, (daily.time || []).length);
-  for (let i = 0; i < lenD; i++) {
-    dailyArr.push({
-      date: daily.time[i],
-      tmin: daily.temperature_2m_min?.[i] ?? null,
-      tmax: daily.temperature_2m_max?.[i] ?? null,
-      precip_prob_max: daily.precipitation_probability_max?.[i] ?? null
-    });
-  }
-
-  const alertHeavyRain = (daily.precipitation_probability_max || []).some(v => (v ?? 0) > 60);
-
-  let nextRainTime = null;
-  for (let i = 0; i < (hourly.precipitation_probability || []).length; i++) {
-    const p = hourly.precipitation_probability[i];
-    const t = hourly.time[i];
-    if ((p ?? 0) >= 40) { nextRainTime = t; break; }
-  }
-
-  return {
-    city_key: cityInfo.key,
-    city_name_th: cityInfo.nameTH,
-    latitude: cityInfo.latitude,
-    longitude: cityInfo.longitude,
-    current: {
-      temp: current.temperature_2m ?? null,
-      windspeed: current.wind_speed_10m ?? null,
-      wmo: current.weather_code ?? null,
-      icon: wmoToEmoji(current.weather_code),
-      desc_th: wmoToTextTH(current.weather_code),
-      time_utc: current.time ?? null
-    },
-    hourly: hourlyArr,
-    daily: dailyArr,
-    alert: alertHeavyRain ? "⚠️ คำเตือนเรื่องฝนตกหนัก" : null,
-    next_rain_time: nextRainTime,
-    provider: "open-meteo"
-  };
-}
-
-// ==== Routes ====
-app.get("/api/health", (req,res) => res.json({ok:true, service:"weather-backend"}));
-
-app.get("/api/cities", (req,res) => {
-  const cities = Object.entries(CITY_COORDS).map(([key, v]) => ({ key, nameTH: v.nameTH }));
-  res.json({ ok:true, cities });
+  console.log(`Backend listening on http://localhost:${port}`);
 });
 
-app.get("/api/weather", async (req,res) => {
+async function gracefulShutdown(code = 0) {
   try {
-    const { city: cityRaw = "bangkok" } = req.query;
-    const cityInfo = getCityInfo(cityRaw);
-
-    const raw = await fetchFromOpenMeteo(cityInfo);
-    const shaped = shapeResponse(cityInfo, raw);
-
-    await Observation.create({
-      city: cityInfo.key,
-      latitude: cityInfo.latitude,
-      longitude: cityInfo.longitude,
-      temp: shaped.current.temp,
-      windspeed: shaped.current.windspeed,
-      provider_time_utc: shaped.current.time_utc
-    });
-
-    res.json({ ok:true, data: shaped });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ ok:false, error: err.message });
+    clearInterval(interval);
+    io.close();
+    listener.close();
+    await mongoose.connection.close();
+  } catch (_) {
+    // ignore
+  } finally {
+    process.exit(code);
   }
-});
-
-app.get("/api/history", async (req,res) => {
-  try {
-    const { city: cityRaw, limit = 50 } = req.query;
-    const q = {};
-    if (cityRaw) q.city = (cityRaw || "").toLowerCase().trim();
-    const items = await Observation.find(q).sort({fetched_at:-1}).limit(Number(limit));
-    res.json({ ok:true, items });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ ok:false, error: err.message });
-  }
-});
-
-function start(port, triesLeft=5) {
-  const server = app.listen(port, () => {
-    console.log(`✅ Backend running on http://localhost:${port}`);
-    console.log(`Try: curl "http://localhost:${port}/api/weather?city=bangkok"`);
-  });
-  server.on("error", (err) => {
-    if (err.code === "EADDRINUSE" && triesLeft > 0) {
-      const next = port + 1;
-      console.warn(`⚠️ Port ${port} busy, trying ${next}...`);
-      start(next, triesLeft-1);
-    } else {
-      console.error("❌ Cannot start server:", err.message);
-      process.exit(1);
-    }
-  });
 }
-start(PORT);
+
+process.on('SIGINT', () => gracefulShutdown(0));
+process.on('SIGTERM', () => gracefulShutdown(0));

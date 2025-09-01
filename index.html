@@ -110,13 +110,22 @@
     .h-pop{ color:var(--muted); font-size:.9rem }
 
     .daily{ display:flex; flex-direction:column; gap:8px; padding:6px }
-    /* ชื่อวัน | Tmin | แถบ temp | Tmax | อีโมจิ(คงที่) | %ฝน */
-    .drow{
-      display:grid;
-      grid-template-columns: 64px 56px 2.4fr 56px 36px 56px;
-      align-items:center;
-      gap:8px;
-    }
+    /* ชื่อวัน | Tmin | แถบ temp | Tmax | อีโมจิ | %ฝน */
+.drow{
+  display:grid;
+  grid-template-columns: 64px 48px 2fr 48px 36px 48px;
+  align-items:center;
+  gap:6px; /* ลดช่องว่างลงนิดหน่อย */
+}
+
+.bar{
+  position:relative;
+  height:10px; /* ขยายความสูงให้ชัดขึ้น */
+  background:rgba(255,255,255,.12);
+  border-radius:999px;
+  overflow:hidden;
+}
+
     .emo{ text-align:center; font-size:1.1rem; }
     .pop{ display:flex; align-items:center; justify-content:flex-end; gap:6px; }
     .d-min{text-align:right;opacity:.95} .d-max{text-align:left;opacity:.95} .d-name{color:var(--text);opacity:.95}

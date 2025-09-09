@@ -1,0 +1,15 @@
+{
+  "name": "web_weather",
+  "version": "1.0.0",
+  "description": "## Run Mongo (Docker) ```bash docker run --name some-mongo \\   -p 27017:27017 \\   -v /home/$USER/weather/mongodb/data:/data/db \\   -e MONGO_INITDB_ROOT_USERNAME=root \\   -e MONGO_INITDB_ROOT_PASSWORD=password \\   -d mongo:latest --auth ```",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

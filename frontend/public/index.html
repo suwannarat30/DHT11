@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <title>ESP32 Realtime Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+  <h1>🌡️ ESP32 Realtime Dashboard</h1>
+
+  <!-- เหลือเฉพาะค่าล่าสุด -->
+  <div class="card">
+    <h2>Latest Reading</h2>
+    <div>Temperature: <b id="temp">-</b> °C</div>
+    <div>Humidity: <b id="hum">-</b> %</div>
+    <div>Time: <span id="ts">-</span></div>
+  </div>
+
+  <script>
+    // ===== ตั้งค่า host ของ backend =====
+    const params = new URLSearchParams(location.search);
+    const overrideHost = params.get('host');
+    const host = overrideHost || window.location.hostname; // เปิดหน้าเว็บจากเครื่องเดียวกันให้ใช้ hostname ได้เลย
+
+    // ===== WebSocket =====
+    const wsUrl = `ws://${host}:3001`;
+    const temp = document.getElementById("temp");
+    const hum  = document.getElementById("hum");
+    const ts   = document.getElementById("ts");
+
+    function connectWS() {
+      const ws = new WebSocket(wsUrl);
+
+      ws.addEventListener("message", (ev) => {
+        try {
+          const data = JSON.parse(ev.data); // { temperature, humidity, ts }
+          if (typeof data.temperature !== "undefined") temp.textContent = data.temperature;
+          if (typeof data.humidity    !== "undefined") hum.textContent  = data.humidity;
+          if (data.ts) ts.textContent = new Date(data.ts).toLocaleString();
+        } catch (e) {
+          console.error("Invalid WS payload:", ev.data);
+        }
+      });
+
+      ws.addEventListener("close", () => {
+        // ต่อใหม่อัตโนมัติเมื่อหลุด
+        setTimeout(connectWS, 1500);
+      });
+
+      ws.addEventListener("error", (e) => {
+        console.error("WS error:", e);
+      });
+    }
+    connectWS();
+
+    // (ไม่ต้องมี health check หรือข้อความ debug อีกต่อไป)
+  </script>
+</body>
+</html>

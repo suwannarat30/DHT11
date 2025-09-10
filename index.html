@@ -29,21 +29,24 @@
       --gridDark:rgba(255,255,255,.15);
     }
     [data-theme="dark"]{
-      /* Dark: โทนเข้ม + อักษรสว่าง/คอนทราสต์สูง */
-      --bg1:#0b1220;
-      --bg2:#111827;
-      --bg3:#1f2937;
-      --text:#ffffff;                 /* ขาวชัด */
-      --muted:rgba(255,255,255,.92);  /* ตัวรองสว่างขึ้น */
-      --panel:rgba(255,255,255,.08);
-      --panel-2:rgba(255,255,255,.10);
-      --border:rgba(255,255,255,.20);
-      --shadow:0 22px 50px rgba(0,0,0,.65);
-      --lineT:#ffd1c1;
-      --lineH:#b7dcff;
-      --statusText:#0e1726;
-      --statusBg:rgba(255,255,255,.97);
-      --statusBorder:rgba(255,255,255,1);
+      /* Dark: โทนดำล้วน + อักษรขาวคอนทราสต์สูง */
+      --bg1:#000000;
+      --bg2:#0a0a0a;
+      --bg3:#111111;
+      --text:#ffffff;
+      --muted:rgba(255,255,255,.92);
+
+      --panel:rgba(255,255,255,.06);
+      --panel-2:rgba(255,255,255,.08);
+      --border:rgba(255,255,255,.14);
+      --shadow:0 22px 50px rgba(0,0,0,.78);
+
+      --lineT:#ffb6a1;    /* อุณหภูมิ peach อมสว่าง */
+      --lineH:#9cd2ff;    /* ความชื้น ฟ้าอ่อน */
+
+      --statusText:#0e1726;             /* การ์ดสถานะยังคงพื้นสว่างอ่านง่าย */
+      --statusBg:rgba(255,255,255,.98);
+      --statusBorder:#ffffff;
     }
 
     *{box-sizing:border-box}
@@ -211,11 +214,11 @@
     [data-theme="dark"] .label,
     [data-theme="dark"] .unit,
     [data-theme="dark"] .subtext{
-      color:#e8ecf8;
+      color:#f3f6ff;
       font-weight:700;
     }
     [data-theme="dark"] .legend{
-      color:#e6eaf5;
+      color:#eef2ff;
       background:rgba(255,255,255,.08);
       border-color:rgba(255,255,255,.18);
     }

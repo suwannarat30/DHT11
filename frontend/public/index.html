@@ -1,63 +1,149 @@
-<!doctype html>
-<html lang="th">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>ESP32 Realtime Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; }
-    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature and Humidity Monitor</title>
+    <!-- Google Fonts for a fresh look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f4f8;
+            margin: 0;
+            flex-direction: column;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            align-items: center;
+            padding: 2.5em;
+        }
+        .card {
+            text-align: center;
+            padding: 2.5em 3.5em;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        .label {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .value {
+            font-size: 4.5em;
+            font-weight: 700;
+            margin: 0;
+        }
+        .unit {
+            font-size: 1.5em;
+            color: #95a5a6;
+            margin-top: -10px;
+            display: block;
+        }
+        #temperature-value {
+            color: #e74c3c;
+        }
+        #humidity-value {
+            color: #3498db;
+        }
+        .status-message {
+            margin-top: 2em;
+            color: #555;
+            font-size: 1em;
+            background-color: #ecf0f1;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        .emoji {
+            font-size: 1.2em;
+        }
+    </style>
 </head>
 <body>
-  <h1>🌡️ ESP32 Realtime Dashboard</h1>
+    <h1>Current Weather Conditions</h1>
+    <div class="container">
+        <div class="card">
+            <div class="label">Temperature <span class="emoji">🌡️</span></div>
+            <div class="value" id="temperature-value">--</div>
+            <span class="unit">°C</span>
+        </div>
+        <div class="card">
+            <div class="label">Humidity <span class="emoji">💧</span></div>
+            <div class="value" id="humidity-value">--</div>
+            <span class="unit">%</span>
+        </div>
+    </div>
+    <div class="status-message" id="status-message">Connecting...</div>
 
-  <!-- เหลือเฉพาะค่าล่าสุด -->
-  <div class="card">
-    <h2>Latest Reading</h2>
-    <div>Temperature: <b id="temp">-</b> °C</div>
-    <div>Humidity: <b id="hum">-</b> %</div>
-    <div>Time: <span id="ts">-</span></div>
-  </div>
+    <script>
+        // Create WebSocket connection
+        const ws = new WebSocket('ws://localhost:3001');
 
-  <script>
-    // ===== ตั้งค่า host ของ backend =====
-    const params = new URLSearchParams(location.search);
-    const overrideHost = params.get('host');
-    const host = overrideHost || window.location.hostname; // เปิดหน้าเว็บจากเครื่องเดียวกันให้ใช้ hostname ได้เลย
+        // When connected
+        ws.onopen = () => {
+            console.log('Connected to WebSocket server');
+            document.getElementById('status-message').textContent = 'Connection successful';
+        };
 
-    // ===== WebSocket =====
-    const wsUrl = `ws://${host}:3001`;
-    const temp = document.getElementById("temp");
-    const hum  = document.getElementById("hum");
-    const ts   = document.getElementById("ts");
+        // When a message is received from the Backend
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('Received data:', data);
 
-    function connectWS() {
-      const ws = new WebSocket(wsUrl);
+                // Check and update temperature value
+                if (data.temperature !== undefined) {
+                    document.getElementById('temperature-value').textContent = data.temperature.toFixed(1);
+                }
 
-      ws.addEventListener("message", (ev) => {
-        try {
-          const data = JSON.parse(ev.data); // { temperature, humidity, ts }
-          if (typeof data.temperature !== "undefined") temp.textContent = data.temperature;
-          if (typeof data.humidity    !== "undefined") hum.textContent  = data.humidity;
-          if (data.ts) ts.textContent = new Date(data.ts).toLocaleString();
-        } catch (e) {
-          console.error("Invalid WS payload:", ev.data);
-        }
-      });
+                // Check and update humidity value
+                if (data.humidity !== undefined) {
+                    document.getElementById('humidity-value').textContent = data.humidity.toFixed(1);
+                }
 
-      ws.addEventListener("close", () => {
-        // ต่อใหม่อัตโนมัติเมื่อหลุด
-        setTimeout(connectWS, 1500);
-      });
+            } catch (error) {
+                console.error('Error parsing JSON:', error);
+            }
+        };
 
-      ws.addEventListener("error", (e) => {
-        console.error("WS error:", e);
-      });
-    }
-    connectWS();
+        // When an error occurs
+        ws.onerror = (error) => {
+            console.error('WebSocket Error:', error);
+            document.getElementById('status-message').textContent = 'An error occurred during connection';
+        };
 
-    // (ไม่ต้องมี health check หรือข้อความ debug อีกต่อไป)
-  </script>
+        // When the connection is closed
+        ws.onclose = () => {
+            console.log('Disconnected from WebSocket server');
+            document.getElementById('status-message').textContent = 'Connection closed';
+        };
+
+    </script>
+
 </body>
 </html>

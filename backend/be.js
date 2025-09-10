@@ -1,28 +1,36 @@
-// backend.js
-const express = require("express");
-const cors = require("cors");
-const WebSocket = require("ws");
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const WebSocket = require('ws'); // นำเข้าไลบรารี ws ทั้งหมด
 
 const app = express();
-const HTTP_PORT = 3000;
-const WS_PORT = 3001;
+const port = 3000;
 
-app.use(cors());
-app.use(express.json());
+// สร้าง WebSocket server
+const wss = new WebSocket.Server({ port: 3001 }); // ใช้ WebSocket.Server
 
-const wss = new WebSocket.Server({ port: WS_PORT });
-wss.on("listening", () => console.log(`WS on 0.0.0.0:${WS_PORT}`));
+app.use(cors()); // อนุญาตการเข้าถึงจาก Frontend
+app.use(bodyParser.json()); // ใช้เพียงครั้งเดียวเท่านั้น
 
-app.get("/", (_req, res) => res.send("ok"));
+// HTTP endpoint สำหรับรับข้อมูลจาก ESP32
+app.post('/temperature', (req, res) => {
+  const data = req.body;
+  console.log('Received:', data);
 
-app.post("/temperature", (req, res) => {
-  const payload = { ...req.body, ts: Date.now() };
-  console.log("POST /temperature", payload);
-  // broadcast
-  wss.clients.forEach(c => {
-    if (c.readyState === WebSocket.OPEN) c.send(JSON.stringify(payload));
+  // ส่งข้อมูลไปยังทุก client ที่เชื่อมต่อผ่าน WebSocket
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) { // เปลี่ยนเป็น WebSocket.OPEN
+      client.send(JSON.stringify(data));
+    }
   });
-  res.status(201).json({ ok: true });
+
+  res.send('OK');
 });
 
-app.listen(HTTP_PORT, "0.0.0.0", () => console.log(`HTTP on 0.0.0.0:${HTTP_PORT}`));
+app.listen(port, () => {
+  console.log(`Backend listening on port ${port}`);
+});
+
+wss.on('listening', () => {
+  console.log('WebSocket server listening on port 3001');
+});

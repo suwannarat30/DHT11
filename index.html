@@ -3,175 +3,204 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Temperature & Humidity Monitor</title>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Temperature and Humidity Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #f7f9fc;
-      --text: #2a2a2a;
-      --card: #ffffff;
-      --temp: #ff9b73;
-      --hum: #5aa9e6;
-      --shadow: 0 6px 18px rgba(0,0,0,.08);
+    /* ======= Theme (iOS glass) — visual only, no logic changes ======= */
+    :root{
+      --text:#f3f7fd;
+      --muted:rgba(255,255,255,.85);
+      --panel:rgba(255,255,255,.14);
+      --panel-2:rgba(255,255,255,.18);
+      --border:rgba(255,255,255,.28);
+      --shadow:0 22px 50px rgba(10,25,60,.33);
+      --shine:rgba(255,255,255,.24);
     }
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body {
-      font-family: 'Kanit', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      display:flex;
-      justify-content:center;
-      padding:20px;
-    }
-    .container {
-      max-width: 1100px;
-      width: 100%;
-      display: grid;
-      gap: 20px;
-    }
-    header {
-      text-align:center;
-      margin-bottom:10px;
-    }
-    header h1 {
-      font-size: 26px;
-      font-weight:700;
-      color:#333;
-    }
-    header p {
-      color:#666;
-      font-size:14px;
-    }
+    *{box-sizing:border-box}
 
-    .cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
+    @keyframes bgShift{
+      0%{ background-position: 0% 0%, 0% 0%;}
+      50%{ background-position: 100% 50%, 50% 100%;}
+      100%{ background-position: 0% 0%, 0% 0%;}
     }
-    @media(max-width:768px){
-      .cards{grid-template-columns:1fr;}
-    }
-    .card {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: var(--shadow);
-      display:flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .big-value {
-      font-size: 56px;
-      font-weight: 700;
-      margin: 10px 0;
-    }
-    .label {
-      font-weight:600;
-      font-size:16px;
-      color:#555;
-    }
-
-    .donut {
-      --p:0;
-      width:140px;
-      height:140px;
-      border-radius:50%;
+    body{
+      margin:0; min-height:100vh; color:var(--text);
+      font-family:'Poppins',system-ui,Segoe UI,Arial,sans-serif;
       background:
-        conic-gradient(var(--hum) calc(var(--p)*1%), #e4ebf7 0);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:28px;
-      font-weight:700;
-      color: var(--text);
-      position:relative;
-    }
-    .donut::after{
-      content:"";
-      position:absolute;
-      width:100px;
-      height:100px;
-      border-radius:50%;
-      background:#fff;
-    }
-    .donut span{
-      position:relative;
-      z-index:2;
+        radial-gradient(1100px 900px at 90% -10%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 60%),
+        linear-gradient(180deg, #153a89 0%, #3f66bf 55%, #6aa6da 100%);
+      background-size: 120% 120%, 100% 100%;
+      animation: bgShift 22s ease-in-out infinite;
+      display:flex; align-items:center; justify-content:center; padding:20px;
     }
 
-    .status {
-      text-align:center;
-      padding:10px;
-      background:#e4ebf7;
-      border-radius:10px;
-      font-weight:600;
-      margin-top:10px;
+    .board{
+      width:min(1080px,96vw);
+      border-radius:28px; background:var(--panel);
+      backdrop-filter: blur(18px) saturate(125%); -webkit-backdrop-filter: blur(18px) saturate(125%);
+      border:1px solid var(--border); box-shadow:var(--shadow); overflow:hidden;
+      position:relative;
+    }
+    /* soft spotlight */
+    .board::before{
+      content:""; position:absolute; inset:-2px;
+      background: radial-gradient(900px 500px at 25% -10%, rgba(255,255,255,.18), transparent 60%);
+      pointer-events:none;
     }
 
-    .chart {
-      background: var(--card);
-      border-radius:16px;
-      padding:16px;
-      box-shadow: var(--shadow);
+    .bar{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 22px; border-bottom:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0));
     }
-    .legend {
-      display:flex;
-      justify-content:flex-end;
-      gap:20px;
-      font-size:13px;
-      margin-bottom:6px;
+    .bar .place{font-weight:700; font-size:22px; letter-spacing:.2px; text-shadow:0 1px 0 rgba(0,0,0,.25)}
+    .bar .chip{
+      font-size:14px; font-weight:600; color:#18325e;
+      background:rgba(255,255,255,.95);
+      border:1px solid rgba(255,255,255,.98);
+      padding:6px 12px; border-radius:999px;
+      box-shadow:0 8px 18px rgba(0,0,0,.18);
     }
-    .dot{
-      width:12px;height:12px;border-radius:50%;
-      display:inline-block;margin-right:6px;
+
+    .grid{display:grid; grid-template-columns: 1.3fr .7fr; gap:18px; padding:18px;}
+    @media (max-width:960px){ .grid{grid-template-columns:1fr} }
+
+    .main{
+      background:var(--panel-2); border:1px solid var(--border); border-radius:22px;
+      padding:20px; box-shadow:var(--shadow);
+      display:grid; grid-template-columns: 96px 1fr; gap:16px; align-items:center;
+      position:relative; overflow:hidden;
     }
-    .dot.t{background:var(--temp);}
-    .dot.h{background:var(--hum);}
-    canvas{width:100%;height:280px;display:block;}
+    .main::after{
+      content:""; position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
+      pointer-events:none;
+    }
+    .icon{
+      width:78px;height:78px;border-radius:18px;
+      background:linear-gradient(180deg, var(--shine), rgba(255,255,255,.08));
+      border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      font-size:40px; box-shadow: inset 0 12px 24px rgba(255,255,255,.15), inset 0 -10px 20px rgba(0,0,0,.15);
+    }
+    .tempBlock{display:flex;flex-direction:column}
+    .tempRow{display:flex;align-items:baseline;gap:10px}
+    #temperature-value{
+      font-size: clamp(44px, 9vw, 78px);
+      font-weight:800; line-height:1; text-shadow:0 2px 0 rgba(0,0,0,.28);
+      letter-spacing:.4px;
+      background: linear-gradient(180deg, #ffffff, #e8f0ff);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,.18));
+    }
+    .unit{font-weight:700;color:var(--muted)}
+    .subtext{margin-top:4px;color:var(--muted);font-weight:600}
+
+    .side{display:flex;flex-direction:column;gap:18px}
+    .panel{background:var(--panel-2); border:1px solid var(--border); border-radius:20px; padding:18px; box-shadow:var(--shadow)}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .label{font-weight:700;color:var(--muted);display:flex;align-items:center;gap:8px}
+
+    /* Donut humidity */
+    .donut{
+      --p:0; width:132px;height:132px;border-radius:50%;
+      background:
+        conic-gradient(#9fcbff calc(var(--p)*1%), rgba(255,255,255,.12) 0),
+        radial-gradient(closest-side, rgba(0,0,0,0) 70%, rgba(255,255,255,.25) 0);
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid var(--border);
+      box-shadow: inset 0 12px 26px rgba(255,255,255,.12), inset 0 -14px 24px rgba(0,0,0,.16);
+      transition: background .7s cubic-bezier(.2,.7,.2,1);
+    }
+    .donut .num{font-size:36px;font-weight:800;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+    .donut small{color:var(--muted);font-weight:700;margin-left:4px}
+
+    /* Status chip */
+    #status-message{
+      text-align:center; color:#0b1633; background:rgba(255,255,255,.95);
+      border:1px solid rgba(255,255,255,.98); border-radius:12px; padding:10px 12px; font-weight:600;
+      box-shadow:0 10px 22px rgba(0,0,0,.18);
+      min-width:220px;
+    }
+
+    /* Chart panel */
+    .chart-panel{grid-column:1 / -1;}
+    .chart-wrap{height:270px; position:relative; border-radius:18px; overflow:hidden}
+    canvas{width:100%; height:100%; display:block; filter: drop-shadow(0 10px 22px rgba(0,0,0,.18));}
+    .legend{
+      position:absolute; top:10px; right:12px; font-size:12px; color:var(--muted); display:flex; gap:12px;
+      background:rgba(0,0,0,.18); padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.22);
+      backdrop-filter: blur(6px);
+    }
+    .dot{width:10px;height:10px;border-radius:50%; box-shadow:0 0 0 2px rgba(255,255,255,.4) inset}
+    .t{background:#ffd1c1}
+    .h{background:#b7dcff}
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Temperature & Humidity Monitor</h1>
-      <p>Real-time Sensor Data</p>
-    </header>
-
-    <div class="cards">
-      <div class="card">
-        <div class="label">🌡️ Temperature</div>
-        <div class="big-value"><span id="temperature-value">--</span>°C</div>
-      </div>
-      <div class="card">
-        <div class="label">💧 Humidity</div>
-        <div class="donut" id="humidity-donut" style="--p:0">
-          <span id="humidity-value">--%</span>
-        </div>
-      </div>
+  <div class="board">
+    <div class="bar">
+      <div class="place">Temperature and Humidity</div>
+      <div class="chip">24 ชม.</div>
     </div>
 
-    <div class="status" id="status-message">Connecting...</div>
+    <div class="grid">
+      <!-- Left:Tem perature block -->
+      <section class="main">
+        <div class="icon">☀️</div>
+        <div class="tempBlock">
+          <div class="tempRow">
+            <div id="temperature-value">--</div>
+            <div class="unit">°C</div>
+          </div>
+          <div class="subtext">Temperature</div>
+        </div>
+      </section>
 
-    <div class="chart">
-      <div class="legend">
-        <span><span class="dot t"></span>Temp</span>
-        <span><span class="dot h"></span>Humidity</span>
-      </div>
-      <canvas id="chart"></canvas>
+      <!-- Right: Humidity + status -->
+      <section class="side">
+        <div class="panel">
+          <div class="row" style="gap:18px;">
+            <div class="label">Humidity 💧</div>
+            <div class="donut" id="humidity-donut" style="--p:0">
+              <span class="num" id="humidity-value">--</span><small>%</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="display:flex;justify-content:center;align-items:center;">
+          <div id="status-message">Connecting...</div>
+        </div>
+      </section>
+
+      <!-- Animated chart -->
+      <section class="panel chart-panel">
+        <div class="chart-wrap">
+          <canvas id="chart"></canvas>
+          <div class="legend">
+            <span style="display:flex;align-items:center;gap:6px"><span class="dot t"></span>Temp</span>
+            <span style="display:flex;align-items:center;gap:6px"><span class="dot h"></span>Humidity</span>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 
   <script>
-    /* ====== โค้ดการทำงานเหมือนเดิม ====== */
+    /* ===== ไม่แตะการทำงานหลัก เปลี่ยนเฉพาะหน้าตา ===== */
     const BACKEND_BASE = "https://dht11-2gtd.onrender.com";
+
     function setText(id, value){
       const el = document.getElementById(id);
       if (el) el.textContent = value;
     }
 
+    /* rolling history for chart (front-end only) */
     const MAX_POINTS = 60;
     const series = { t: [], h: [], ts: [] };
+
     const canvas = document.getElementById('chart');
     const ctx = canvas.getContext('2d');
     let dpi = 1;
@@ -211,19 +240,29 @@
     function drawChart(progress=1){
       const w = canvas.width, h = canvas.height;
       ctx.clearRect(0,0,w,h);
+
+      /* grid */
       ctx.save();
-      ctx.strokeStyle = 'rgba(0,0,0,.08)';
+      ctx.strokeStyle = 'rgba(255,255,255,.15)';
       ctx.lineWidth = 1;
-      const gx=8, gy=5;
-      for(let i=1;i<gx;i++){ ctx.beginPath(); ctx.moveTo((w/gx)*i,0); ctx.lineTo((w/gx)*i,h); ctx.stroke(); }
-      for(let i=1;i<gy;i++){ ctx.beginPath(); ctx.moveTo(0,(h/gy)*i); ctx.lineTo(w,(h/gy)*i); ctx.stroke(); }
+      const gx = 8, gy = 5;
+      for(let i=1;i<gx;i++){
+        const x = (w/gx)*i;
+        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+      }
+      for(let i=1;i<gy;i++){
+        const y = (h/gy)*i;
+        ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+      }
       ctx.restore();
 
       if (series.t.length < 2) return;
+
       const minT = Math.min(...series.t), maxT = Math.max(...series.t);
       const minH = Math.min(...series.h), maxH = Math.max(...series.h);
       const [yMinT,yMaxT] = niceRange(minT, maxT);
       const [yMinH,yMaxH] = niceRange(minH, maxH);
+
       const N = series.t.length;
       const pad = 16 * dpi;
       const plotW = w - pad*2;
@@ -231,21 +270,34 @@
       const xAt = i => pad + (i/(N-1))*plotW;
       const yAtT = v => pad + (1 - (v - yMinT)/(yMaxT - yMinT))*plotH;
       const yAtH = v => pad + (1 - (v - yMinH)/(yMaxH - yMinH))*plotH;
+
       const sample = (arrFrom, arrTo, i) => lerp(arrFrom[i] ?? arrTo[i], arrTo[i], progress);
 
+      /* temperature */
       ctx.save();
-      ctx.lineWidth = 3*dpi;
-      ctx.strokeStyle = "#ff9b73";
+      ctx.lineWidth = 3 * dpi;
+      ctx.strokeStyle = '#ffd1c1';
       ctx.beginPath();
-      for(let i=0;i<N;i++){ const x=xAt(i); const y=yAtT(sample(anim.fromT,anim.toT,i)); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
-      ctx.stroke(); ctx.restore();
+      for (let i=0;i<N;i++){
+        const x = xAt(i);
+        const y = yAtT(sample(anim.fromT, anim.toT, i));
+        i? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+      }
+      ctx.stroke();
+      ctx.restore();
 
+      /* humidity */
       ctx.save();
-      ctx.lineWidth = 3*dpi;
-      ctx.strokeStyle = "#5aa9e6";
+      ctx.lineWidth = 3 * dpi;
+      ctx.strokeStyle = '#b7dcff';
       ctx.beginPath();
-      for(let i=0;i<N;i++){ const x=xAt(i); const y=yAtH(sample(anim.fromH,anim.toH,i)); i?ctx.lineTo(x,y):ctx.moveTo(x,y); }
-      ctx.stroke(); ctx.restore();
+      for (let i=0;i<N;i++){
+        const x = xAt(i);
+        const y = yAtH(sample(anim.fromH, anim.toH, i));
+        i? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+      }
+      ctx.stroke();
+      ctx.restore();
     }
 
     function pushPoint(temp, hum){
@@ -253,7 +305,9 @@
       series.t.push(Number(temp));
       series.h.push(Number(hum));
       series.ts.push(now);
-      if(series.t.length > MAX_POINTS){ series.t.shift(); series.h.shift(); series.ts.shift(); }
+      if (series.t.length > MAX_POINTS){
+        series.t.shift(); series.h.shift(); series.ts.shift();
+      }
       scheduleAnimation();
     }
 
@@ -261,6 +315,7 @@
       try {
         const res = await fetch(`${BACKEND_BASE}/data`, { cache: "no-store" });
         const data = await res.json();
+
         if (data.temperature !== null) {
           const t = Number(data.temperature);
           setText("temperature-value", t.toFixed(1));
@@ -270,7 +325,7 @@
         }
         if (data.humidity !== null) {
           const h = Number(data.humidity);
-          setText("humidity-value", h.toFixed(0)+"%");
+          setText("humidity-value", h.toFixed(0));
           const donut = document.getElementById('humidity-donut');
           if (donut) donut.style.setProperty('--p', Math.max(0, Math.min(100, h)));
         }

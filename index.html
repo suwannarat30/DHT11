@@ -7,209 +7,166 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
   <style>
-    /* ---------- พื้นหลังสไตล์ iOS (น้ำเงินอมม่วง + glass) ---------- */
+    /* ======= Theme (iOS glass) ======= */
     :root{
-      --glass: rgba(255,255,255,.14);
-      --glass-strong: rgba(255,255,255,.22);
-      --text: #f4f7fb;
-      --muted: rgba(255,255,255,.85);
-      --shadow: 0 20px 40px rgba(0, 20, 60, .25);
-      --ring: inset 0 1px 0 rgba(255,255,255,.25), inset 0 -1px 0 rgba(0,0,0,.08);
-      --card-blue: rgba(255,255,255,.16);
-      --accent: #a7c8ff;
-      --accent-2: #8ad1ff;
+      --text:#f3f7fd;
+      --muted:rgba(255,255,255,.85);
+      --panel:rgba(255,255,255,.14);
+      --panel-2:rgba(255,255,255,.18);
+      --border:rgba(255,255,255,.28);
+      --shadow:0 20px 46px rgba(10,25,60,.30);
     }
-
+    *{box-sizing:border-box}
     body{
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      min-height: 100vh;
-      color: var(--text);
+      margin:0;
+      min-height:100vh;
+      color:var(--text);
+      font-family:'Poppins',system-ui,Segoe UI,Arial,sans-serif;
       background:
-        radial-gradient(1200px 900px at 85% -5%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 60%),
-        linear-gradient(165deg, #143a84 0%, #3858b3 45%, #4f77d3 70%, #6aa6da 100%);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 24px;
+        radial-gradient(1100px 800px at 90% -10%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 60%),
+        linear-gradient(180deg, #1d3f8f 0%, #3f66bf 55%, #6aa6da 100%);
+      display:flex;align-items:center;justify-content:center;
+      padding:20px;
     }
 
-    /* ---------- กล่องใหญ่แบบ glass ---------- */
-    .widget{
-      width: min(720px, 92vw);
-      border-radius: 28px;
-      background: var(--glass);
+    /* ======= Card container ======= */
+    .board{
+      width:min(980px,95vw);
+      border-radius:28px;
+      background:var(--panel);
       backdrop-filter: blur(16px) saturate(120%);
       -webkit-backdrop-filter: blur(16px) saturate(120%);
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255,255,255,.24);
-      overflow: hidden;
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      overflow:hidden;
     }
-    .widget-header{
-      padding: 22px 26px 8px;
-      border-bottom: 1px solid rgba(255,255,255,.12);
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
+    .bar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:18px 22px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0));
     }
-    .title{
-      font-size: clamp(22px, 3.8vw, 30px);
-      font-weight: 700;
-      letter-spacing: .3px;
-      margin: 0;
-      text-shadow: 0 1px 0 rgba(0,0,0,.3);
-    }
-    .widget-body{
-      padding: 22px 26px 26px;
-      display: grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap: 22px;
-    }
-    @media (max-width: 720px){
-      .widget-body{ grid-template-columns: 1fr; gap: 18px; }
+    .bar .place{font-weight:700;font-size:22px;letter-spacing:.2px}
+    .bar .chip{
+      font-size:14px;font-weight:600;color:#19325e;
+      background:rgba(255,255,255,.92); border:1px solid rgba(255,255,255,.95);
+      padding:6px 12px; border-radius:999px;
     }
 
-    /* ---------- วงกลมอุณหภูมิ (เน้นเหมือน iOS) ---------- */
-    .temp-card{
-      background: var(--glass-strong);
-      border: 1px solid rgba(255,255,255,.26);
-      border-radius: 22px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-      display:flex; align-items:center; justify-content:center;
-      position:relative;
+    .grid{
+      display:grid;
+      grid-template-columns: 1.3fr .7fr;
+      gap:18px;
+      padding:18px;
     }
-    .temp-circle{
-      width: min(360px, 72vw);
-      max-width: 420px;
-      aspect-ratio: 1/1;
-      border-radius: 50%;
+    @media (max-width:860px){ .grid{grid-template-columns:1fr} }
+
+    /* ======= Left: main temp with icon ======= */
+    .main{
+      background:var(--panel-2);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:20px;
+      box-shadow:var(--shadow);
+      display:grid; grid-template-columns: 96px 1fr; gap:16px;
+      align-items:center;
+    }
+    .icon{
+      width:78px;height:78px;border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,.08));
+      border:1px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      font-size:40px; box-shadow: inset 0 12px 24px rgba(255,255,255,.15), inset 0 -10px 20px rgba(0,0,0,.15);
+    }
+    .tempBlock{display:flex;flex-direction:column}
+    .tempRow{display:flex;align-items:baseline;gap:10px}
+    #temperature-value{
+      font-size: clamp(44px, 9vw, 76px);
+      font-weight:800; line-height:1; text-shadow:0 2px 0 rgba(0,0,0,.25);
+    }
+    .unit{font-weight:700;color:var(--muted)}
+
+    .subtext{margin-top:4px;color:var(--muted);font-weight:600}
+
+    /* ======= Right: humidity donut + status ======= */
+    .side{display:flex;flex-direction:column;gap:18px}
+
+    .panel{
+      background:var(--panel-2);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:18px; box-shadow:var(--shadow);
+    }
+
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+    .label{font-weight:700;color:var(--muted);display:flex;align-items:center;gap:8px}
+    /* donut */
+    .donut{
+      --p:0; /* filled percent (0-100) */
+      width:128px;height:128px;border-radius:50%;
       background:
-        radial-gradient(60% 60% at 50% 40%, rgba(255,255,255,.35) 0%, rgba(255,255,255,.08) 60%, rgba(255,255,255,0) 70%),
-        linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
-      border: 1px solid rgba(255,255,255,.28);
-      box-shadow: inset 0 10px 30px rgba(255,255,255,.15), inset 0 -18px 28px rgba(0,0,0,.15);
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
+        conic-gradient(#a7d0ff calc(var(--p)*1%), rgba(255,255,255,.12) 0),
+        radial-gradient(closest-side, rgba(0,0,0,0) 70%, rgba(255,255,255,.25) 0);
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid var(--border);
+      box-shadow: inset 0 10px 24px rgba(255,255,255,.12), inset 0 -12px 22px rgba(0,0,0,.15);
     }
-    .temp-label{
-      color: var(--muted);
-      font-size: 18px;
-      margin-bottom: 4px;
-    }
-    .temp-value{
-      font-size: clamp(52px, 10vw, 80px);
-      font-weight: 700;
-      letter-spacing: .5px;
-      line-height: 1;
-      text-shadow: 0 2px 0 rgba(0,0,0,.25);
-    }
-    .temp-unit{
-      margin-top: 6px;
-      color: var(--muted);
-      font-weight: 600;
-    }
+    .donut .num{font-size:34px;font-weight:800;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+    .donut small{color:var(--muted);font-weight:700;margin-left:4px}
 
-    /* ---------- การ์ดความชื้น + สถานะ ---------- */
-    .right-col{ display:flex; flex-direction:column; gap: 18px; }
-    .card{
-      background: var(--card-blue);
-      border: 1px solid rgba(255,255,255,.24);
-      border-radius: 18px;
-      padding: 18px 20px;
-      box-shadow: var(--shadow);
+    /* status chip (ใช้ id เดิม) */
+    #status-message{
+      text-align:center;color:#0b1633;
+      background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.95);
+      border-radius:12px;padding:10px 12px;font-weight:600;
+      box-shadow:0 10px 22px rgba(0,0,0,.18);
     }
-    .row{
-      display:flex; align-items:baseline; justify-content:space-between; gap: 12px;
-    }
-    .label{
-      font-size: 18px; color: var(--muted); font-weight:600; letter-spacing:.2px;
-      display:flex; align-items:center; gap:8px;
-    }
-    .big{
-      font-size: clamp(36px, 8vw, 56px);
-      font-weight: 700;
-      color: #eaf2ff;
-      text-shadow: 0 2px 0 rgba(0,0,0,.25);
-    }
-    .unit{
-      color: var(--muted); font-weight:600; margin-left: 6px;
-    }
-
-    /* สถานะการเชื่อมต่อ (ใช้ id เดิม) */
-    .status-message{
-      margin-top: 0;
-      text-align:center;
-      color: #0b1633;
-      background: rgba(255,255,255,.85);
-      border: 1px solid rgba(255,255,255,.9);
-      border-radius: 14px;
-      display: inline-block;
-      padding: 10px 18px;
-      box-shadow: 0 10px 24px rgba(0,0,0,.18);
-    }
-
-    /* ซ่อนการ์ดเก่า แต่เก็บ element/id เดิมไว้ให้ JS ใช้งานได้ */
-    .legacy-container{ display:none; }
   </style>
 </head>
 <body>
-  <!-- วิดเจ็ตหลักสไตล์ iOS -->
-  <div class="widget">
-    <div class="widget-header">
-      <h1 class="title">DHT11 Humidity and Temperature</h1>
+  <div class="board">
+    <div class="bar">
+      <div class="place">Bangkok</div>
+      <div class="chip">24 ชม.</div>
     </div>
 
-    <div class="widget-body">
-      <!-- วงกลมอุณหภูมิ -->
-      <section class="temp-card">
-        <div class="temp-circle">
-          <div class="temp-label">อุณหภูมิ</div>
-          <div class="temp-value" id="temperature-value">--</div>
-          <div class="temp-unit">°C</div>
+    <div class="grid">
+      <!-- Left: Temperature block -->
+      <section class="main">
+        <div class="icon">☀️</div>
+        <div class="tempBlock">
+          <div class="tempRow">
+            <div id="temperature-value">--</div>
+            <div class="unit">°C</div>
+          </div>
+          <div class="subtext">อุณหภูมิ</div>
         </div>
       </section>
 
-      <!-- การ์ดด้านขวา: ความชื้น + สถานะข้อความ -->
-      <section class="right-col">
-        <div class="card">
-          <div class="row">
+      <!-- Right: Humidity + status -->
+      <section class="side">
+        <div class="panel">
+          <div class="row" style="gap:18px;">
             <div class="label">ความชื้นสัมพัทธ์ 💧</div>
-            <div>
-              <span class="big" id="humidity-value">--</span>
-              <span class="unit">%</span>
+            <div class="donut" id="humidity-donut" style="--p:0">
+              <span class="num" id="humidity-value">--</span><small>%</small>
             </div>
           </div>
         </div>
 
-        <div class="card" style="display:flex;justify-content:center;align-items:center;">
-          <div class="status-message" id="status-message">Connecting...</div>
+        <div class="panel" style="display:flex;justify-content:center;align-items:center;">
+          <div id="status-message">Connecting...</div>
         </div>
       </section>
     </div>
   </div>
 
-  <!-- เก็บ DOM เก่าไว้ (เผื่อ JS อ้าง id เดิม) แต่ซ่อนทั้งชุด -->
-  <div class="legacy-container">
-    <h1>DHT11 Humidity and Temperature Sensor</h1>
-    <div class="container">
-      <div class="card">
-        <div class="label">Temperature <span class="emoji">🌡️</span></div>
-        <div class="value" id="temperature-value-legacy">--</div>
-        <span class="unit">°C</span>
-      </div>
-      <div class="card">
-        <div class="label">Humidity <span class="emoji">💧</span></div>
-        <div class="value" id="humidity-value-legacy">--</div>
-        <span class="unit">%</span>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // ใช้โดเมน backend ของคุณเหมือนเดิม
+    /* ===== ไม่แตะการทำงานหลัก เปลี่ยนเฉพาะหน้าตา ===== */
     const BACKEND_BASE = "https://dht11-2gtd.onrender.com";
 
-    // map ค่าไปแสดงทั้ง “ใหม่” และ “เก่า (ซ่อน)” เผื่อความเข้ากันได้
     function setText(id, value){
       const el = document.getElementById(id);
       if (el) el.textContent = value;
@@ -222,11 +179,13 @@
 
         if (data.temperature !== null) {
           setText("temperature-value", Number(data.temperature).toFixed(1));
-          setText("temperature-value-legacy", Number(data.temperature).toFixed(1));
         }
         if (data.humidity !== null) {
-          setText("humidity-value", Number(data.humidity).toFixed(1));
-          setText("humidity-value-legacy", Number(data.humidity).toFixed(1));
+          const h = Number(data.humidity);
+          setText("humidity-value", h.toFixed(0));
+          /* อัปเดต donut เป็นการแสดงผลล้วน ๆ */
+          const donut = document.getElementById('humidity-donut');
+          if (donut) donut.style.setProperty('--p', Math.max(0, Math.min(100, h)));
         }
         setText("status-message", "Data updated ✅");
       } catch (err) {

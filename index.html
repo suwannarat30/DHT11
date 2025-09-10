@@ -4,196 +4,238 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Temperature and Humidity Monitor</title>
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
+    /* ---------- พื้นหลังสไตล์ iOS (น้ำเงินอมม่วง + glass) ---------- */
     :root{
-      --bg-1:#e9f3ff;
-      --bg-2:#f7e9ff;
-      --bg-3:#fff0e3;
-
-      --card-temp-start:#fff5f3;
-      --card-temp-end:#ffe9e5;
-      --card-temp-border:#ff8a7a;
-
-      --card-humi-start:#f3faff;
-      --card-humi-end:#e6f4ff;
-      --card-humi-border:#79b7ff;
-
-      --text-main:#1f2937;
-      --muted:#6b7280;
-
-      --ring: 0 10px 25px rgba(0,0,0,.08);
+      --glass: rgba(255,255,255,.14);
+      --glass-strong: rgba(255,255,255,.22);
+      --text: #f4f7fb;
+      --muted: rgba(255,255,255,.85);
+      --shadow: 0 20px 40px rgba(0, 20, 60, .25);
+      --ring: inset 0 1px 0 rgba(255,255,255,.25), inset 0 -1px 0 rgba(0,0,0,.08);
+      --card-blue: rgba(255,255,255,.16);
+      --accent: #a7c8ff;
+      --accent-2: #8ad1ff;
     }
 
-    body {
+    body{
       font-family: 'Poppins', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
-      flex-direction: column;
-      color: var(--text-main);
+      min-height: 100vh;
+      color: var(--text);
       background:
-        radial-gradient(1200px 800px at 10% 10%, var(--bg-1) 0%, transparent 60%),
-        radial-gradient(1100px 900px at 90% 20%, var(--bg-2) 0%, transparent 60%),
-        radial-gradient(1400px 1000px at 50% 100%, var(--bg-3) 0%, transparent 60%),
-        #f7f9fc;
+        radial-gradient(1200px 900px at 85% -5%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 60%),
+        linear-gradient(165deg, #143a84 0%, #3858b3 45%, #4f77d3 70%, #6aa6da 100%);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 24px;
     }
 
-    .container {
-      display: flex;
-      gap: 28px;
-      justify-content: center;
-      align-items: center;
-      padding: 2.5em;
+    /* ---------- กล่องใหญ่แบบ glass ---------- */
+    .widget{
+      width: min(720px, 92vw);
+      border-radius: 28px;
+      background: var(--glass);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.24);
+      overflow: hidden;
     }
-
-    .card {
-      text-align: center;
-      padding: 2.6em 3.6em;
-      background-color: rgba(255,255,255,0.65);
-      border-radius: 18px;
-      box-shadow: var(--ring);
-      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color .25s ease;
-      border: 2px solid rgba(255,255,255,0.6);
-      backdrop-filter: blur(10px);
+    .widget-header{
+      padding: 22px 26px 8px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
     }
-    .card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 18px 40px rgba(0,0,0,.12);
-    }
-
-    .container .card:nth-child(1){
-      background-image: linear-gradient(160deg, var(--card-temp-start), var(--card-temp-end));
-      border-color: color-mix(in oklab, var(--card-temp-border) 35%, #ffffff 65%);
-    }
-    .container .card:nth-child(1):hover{
-      box-shadow: 0 18px 40px rgba(231, 76, 60, .18);
-    }
-    .container .card:nth-child(2){
-      background-image: linear-gradient(160deg, var(--card-humi-start), var(--card-humi-end));
-      border-color: color-mix(in oklab, var(--card-humi-border) 35%, #ffffff 65%);
-    }
-    .container .card:nth-child(2):hover{
-      box-shadow: 0 18px 40px rgba(52, 152, 219, .18);
-    }
-
-    h1 {
-      color: #0f172a;
-      margin-bottom: 16px;
+    .title{
+      font-size: clamp(22px, 3.8vw, 30px);
       font-weight: 700;
-      letter-spacing: 0.2px;
-    }
-
-    .label {
-      font-size: 1.08em;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      opacity: .9;
-    }
-
-    .value {
-      font-size: 4.6em;
-      font-weight: 700;
+      letter-spacing: .3px;
       margin: 0;
-      line-height: 1;
-      letter-spacing: -1px;
-      text-shadow: 0 1px 0 rgba(255,255,255,.6);
+      text-shadow: 0 1px 0 rgba(0,0,0,.3);
     }
-    .unit {
-      font-size: 1.1em;
-      color: #8a94a6;
+    .widget-body{
+      padding: 22px 26px 26px;
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 22px;
+    }
+    @media (max-width: 720px){
+      .widget-body{ grid-template-columns: 1fr; gap: 18px; }
+    }
+
+    /* ---------- วงกลมอุณหภูมิ (เน้นเหมือน iOS) ---------- */
+    .temp-card{
+      background: var(--glass-strong);
+      border: 1px solid rgba(255,255,255,.26);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      display:flex; align-items:center; justify-content:center;
+      position:relative;
+    }
+    .temp-circle{
+      width: min(360px, 72vw);
+      max-width: 420px;
+      aspect-ratio: 1/1;
+      border-radius: 50%;
+      background:
+        radial-gradient(60% 60% at 50% 40%, rgba(255,255,255,.35) 0%, rgba(255,255,255,.08) 60%, rgba(255,255,255,0) 70%),
+        linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
+      border: 1px solid rgba(255,255,255,.28);
+      box-shadow: inset 0 10px 30px rgba(255,255,255,.15), inset 0 -18px 28px rgba(0,0,0,.15);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .temp-label{
+      color: var(--muted);
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .temp-value{
+      font-size: clamp(52px, 10vw, 80px);
+      font-weight: 700;
+      letter-spacing: .5px;
+      line-height: 1;
+      text-shadow: 0 2px 0 rgba(0,0,0,.25);
+    }
+    .temp-unit{
       margin-top: 6px;
-      display: block;
+      color: var(--muted);
       font-weight: 600;
     }
 
-    #temperature-value {
-      color: #e45745;
+    /* ---------- การ์ดความชื้น + สถานะ ---------- */
+    .right-col{ display:flex; flex-direction:column; gap: 18px; }
+    .card{
+      background: var(--card-blue);
+      border: 1px solid rgba(255,255,255,.24);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
     }
-    #humidity-value {
-      color: #2f97de;
+    .row{
+      display:flex; align-items:baseline; justify-content:space-between; gap: 12px;
+    }
+    .label{
+      font-size: 18px; color: var(--muted); font-weight:600; letter-spacing:.2px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .big{
+      font-size: clamp(36px, 8vw, 56px);
+      font-weight: 700;
+      color: #eaf2ff;
+      text-shadow: 0 2px 0 rgba(0,0,0,.25);
+    }
+    .unit{
+      color: var(--muted); font-weight:600; margin-left: 6px;
     }
 
-    .status-message {
-      margin-top: 1.8em;
-      color: #334155;
-      font-size: 0.98em;
-      background: rgba(255,255,255,0.6);
+    /* สถานะการเชื่อมต่อ (ใช้ id เดิม) */
+    .status-message{
+      margin-top: 0;
+      text-align:center;
+      color: #0b1633;
+      background: rgba(255,255,255,.85);
+      border: 1px solid rgba(255,255,255,.9);
+      border-radius: 14px;
+      display: inline-block;
       padding: 10px 18px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.7);
-      box-shadow: 0 6px 16px rgba(0,0,0,.06);
-      backdrop-filter: blur(6px);
+      box-shadow: 0 10px 24px rgba(0,0,0,.18);
     }
 
-    .emoji {
-      font-size: 1.15em;
-    }
-
-    @media (max-width: 680px){
-      .container{flex-direction: column;}
-      .card{width: min(92vw, 520px);}
-      .value{font-size: 3.8em;}
-    }
+    /* ซ่อนการ์ดเก่า แต่เก็บ element/id เดิมไว้ให้ JS ใช้งานได้ */
+    .legacy-container{ display:none; }
   </style>
 </head>
 <body>
-  <h1>DHT11 Humidity and Temperature Sensor</h1>
-  <div class="container">
-    <div class="card">
-      <div class="label">Temperature <span class="emoji">🌡️</span></div>
-      <div class="value" id="temperature-value">--</div>
-      <span class="unit">°C</span>
+  <!-- วิดเจ็ตหลักสไตล์ iOS -->
+  <div class="widget">
+    <div class="widget-header">
+      <h1 class="title">DHT11 Humidity and Temperature</h1>
     </div>
-    <div class="card">
-      <div class="label">Humidity <span class="emoji">💧</span></div>
-      <div class="value" id="humidity-value">--</div>
-      <span class="unit">%</span>
+
+    <div class="widget-body">
+      <!-- วงกลมอุณหภูมิ -->
+      <section class="temp-card">
+        <div class="temp-circle">
+          <div class="temp-label">อุณหภูมิ</div>
+          <div class="temp-value" id="temperature-value">--</div>
+          <div class="temp-unit">°C</div>
+        </div>
+      </section>
+
+      <!-- การ์ดด้านขวา: ความชื้น + สถานะข้อความ -->
+      <section class="right-col">
+        <div class="card">
+          <div class="row">
+            <div class="label">ความชื้นสัมพัทธ์ 💧</div>
+            <div>
+              <span class="big" id="humidity-value">--</span>
+              <span class="unit">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="display:flex;justify-content:center;align-items:center;">
+          <div class="status-message" id="status-message">Connecting...</div>
+        </div>
+      </section>
     </div>
   </div>
-  <div class="status-message" id="status-message">Connecting...</div>
+
+  <!-- เก็บ DOM เก่าไว้ (เผื่อ JS อ้าง id เดิม) แต่ซ่อนทั้งชุด -->
+  <div class="legacy-container">
+    <h1>DHT11 Humidity and Temperature Sensor</h1>
+    <div class="container">
+      <div class="card">
+        <div class="label">Temperature <span class="emoji">🌡️</span></div>
+        <div class="value" id="temperature-value-legacy">--</div>
+        <span class="unit">°C</span>
+      </div>
+      <div class="card">
+        <div class="label">Humidity <span class="emoji">💧</span></div>
+        <div class="value" id="humidity-value-legacy">--</div>
+        <span class="unit">%</span>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // ===== ปรับ URL backend ตรงนี้ =====
-    // ตัวอย่างทดสอบใน LAN:
-    // const BACKEND_BASE = "http://192.168.1.50:3000";
-    // ถ้า deploy แล้ว (แนะนำ): ใช้ https://<your-backend-domain>
+    // ใช้โดเมน backend ของคุณเหมือนเดิม
     const BACKEND_BASE = "https://dht11-2gtd.onrender.com";
+
+    // map ค่าไปแสดงทั้ง “ใหม่” และ “เก่า (ซ่อน)” เผื่อความเข้ากันได้
+    function setText(id, value){
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
 
     async function fetchData() {
       try {
         const res = await fetch(`${BACKEND_BASE}/data`, { cache: "no-store" });
         const data = await res.json();
-        console.log("Fetched:", data);
 
         if (data.temperature !== null) {
-          document.getElementById("temperature-value").textContent =
-            Number(data.temperature).toFixed(1);
+          setText("temperature-value", Number(data.temperature).toFixed(1));
+          setText("temperature-value-legacy", Number(data.temperature).toFixed(1));
         }
         if (data.humidity !== null) {
-          document.getElementById("humidity-value").textContent =
-            Number(data.humidity).toFixed(1);
+          setText("humidity-value", Number(data.humidity).toFixed(1));
+          setText("humidity-value-legacy", Number(data.humidity).toFixed(1));
         }
-        document.getElementById("status-message").textContent = "Data updated ✅";
+        setText("status-message", "Data updated ✅");
       } catch (err) {
         console.error("Fetch error:", err);
-        document.getElementById("status-message").textContent = "Error fetching data ⚠️";
+        setText("status-message", "Error fetching data ⚠️");
       }
     }
 
-    // เรียกครั้งแรก
     fetchData();
-    // แล้วเรียกซ้ำทุก 5 วินาที
     setInterval(fetchData, 5000);
   </script>
 </body>

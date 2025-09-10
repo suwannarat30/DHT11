@@ -8,84 +8,34 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ================= THEME TOKENS (ไม่กระทบ logic) ================= */
+    /* ======= Theme (iOS glass) — visual only, no logic changes ======= */
     :root{
-      /* Light (default) */
-      --bg1:#e9f0ff;
-      --bg2:#cfe3ff;
-      --bg3:#9dd1ff;
-      --text:#0f172a;
-      --muted:rgba(15,23,42,.75);
-      --panel:rgba(255,255,255,.75);
-      --panel-2:rgba(255,255,255,.82);
-      --border:rgba(15,23,42,.08);
-      --shadow:0 18px 46px rgba(15,23,42,.18);
-      --lineT:#ffb8a1;
-      --lineH:#8ec9ff;
-    }
-    [data-theme="dark"]{
-      --bg1:#143a89;
-      --bg2:#3858b3;
-      --bg3:#6aa6da;
       --text:#f3f7fd;
       --muted:rgba(255,255,255,.85);
       --panel:rgba(255,255,255,.14);
       --panel-2:rgba(255,255,255,.18);
       --border:rgba(255,255,255,.28);
       --shadow:0 22px 50px rgba(10,25,60,.33);
-      --lineT:#ffd1c1;
-      --lineH:#b7dcff;
+      --shine:rgba(255,255,255,.24);
     }
-
     *{box-sizing:border-box}
 
-    /* ================= BACKGROUND ANIMATION (ชั้นหลังสุด) ================= */
+    @keyframes bgShift{
+      0%{ background-position: 0% 0%, 0% 0%;}
+      50%{ background-position: 100% 50%, 50% 100%;}
+      100%{ background-position: 0% 0%, 0% 0%;}
+    }
     body{
-      margin:0; min-height:100vh;
-      color:var(--text);
+      margin:0; min-height:100vh; color:var(--text);
       font-family:'Poppins',system-ui,Segoe UI,Arial,sans-serif;
+      background:
+        radial-gradient(1100px 900px at 90% -10%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 60%),
+        linear-gradient(180deg, #153a89 0%, #3f66bf 55%, #6aa6da 100%);
+      background-size: 120% 120%, 100% 100%;
+      animation: bgShift 22s ease-in-out infinite;
       display:flex; align-items:center; justify-content:center; padding:20px;
-      position:relative; overflow:hidden;
-      background: radial-gradient(1200px 900px at 85% -10%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 60%);
-    }
-    /* ชั้น effect เคลื่อนไหวแบบละมุน */
-    .bg-anim, .bg-anim::before, .bg-anim::after{
-      position:fixed; inset:-20%;
-      pointer-events:none; z-index:-2; content:"";
-      filter: blur(60px) saturate(120%);
-      transform: translateZ(0);
-    }
-    .bg-anim{
-      background: radial-gradient(600px 600px at 20% 15%, var(--bg1), transparent 55%),
-                  radial-gradient(700px 700px at 80% 10%, var(--bg2), transparent 60%),
-                  radial-gradient(800px 800px at 50% 95%, var(--bg3), transparent 60%);
-      animation: drift1 28s ease-in-out infinite alternate;
-    }
-    .bg-anim::before{
-      background: radial-gradient(500px 500px at 10% 80%, var(--bg2), transparent 55%),
-                  radial-gradient(600px 600px at 90% 75%, var(--bg1), transparent 60%);
-      animation: drift2 36s ease-in-out infinite alternate;
-      opacity:.8;
-    }
-    .bg-anim::after{
-      background: radial-gradient(700px 700px at 50% 50%, rgba(255,255,255,.25), transparent 70%);
-      animation: pulse 14s ease-in-out infinite alternate;
-      opacity:.35;
-    }
-    @keyframes drift1{
-      0%{transform:translate3d(-2%, -2%, 0) scale(1);}
-      100%{transform:translate3d(2%, 1%, 0) scale(1.02);}
-    }
-    @keyframes drift2{
-      0%{transform:translate3d(2%, 3%, 0) scale(1.05);}
-      100%{transform:translate3d(-1%, -2%, 0) scale(1.01);}
-    }
-    @keyframes pulse{
-      0%{transform:scale(1);}
-      100%{transform:scale(1.06);}
     }
 
-    /* ================= CONTAINER ================= */
     .board{
       width:min(1080px,96vw);
       border-radius:28px; background:var(--panel);
@@ -93,32 +43,27 @@
       border:1px solid var(--border); box-shadow:var(--shadow); overflow:hidden;
       position:relative;
     }
+    /* soft spotlight */
+    .board::before{
+      content:""; position:absolute; inset:-2px;
+      background: radial-gradient(900px 500px at 25% -10%, rgba(255,255,255,.18), transparent 60%);
+      pointer-events:none;
+    }
 
-    /* ======= Top bar: เอาข้อความเดิมออกและใส่ปุ่มสลับธีมแทน ======= */
     .bar{
-      display:flex; align-items:center; justify-content:flex-end;
-      gap:10px; padding:14px 16px; border-bottom:1px solid rgba(0,0,0,.06);
-      background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0));
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 22px; border-bottom:1px solid rgba(255,255,255,.12);
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0));
     }
-    .theme-toggle{
-      display:inline-flex; align-items:center; gap:8px;
-      font-weight:600; font-size:13px; color:var(--text);
-      background:rgba(255,255,255,.9); border:1px solid rgba(0,0,0,.06);
-      padding:6px 10px; border-radius:999px; cursor:pointer;
-      box-shadow:0 8px 18px rgba(0,0,0,.12);
-      user-select:none;
+    .bar .place{font-weight:700; font-size:22px; letter-spacing:.2px; text-shadow:0 1px 0 rgba(0,0,0,.25)}
+    .bar .chip{
+      font-size:14px; font-weight:600; color:#18325e;
+      background:rgba(255,255,255,.95);
+      border:1px solid rgba(255,255,255,.98);
+      padding:6px 12px; border-radius:999px;
+      box-shadow:0 8px 18px rgba(0,0,0,.18);
     }
-    .theme-toggle input{appearance:none; width:36px; height:20px; border-radius:999px;
-      background:#d1d5db; position:relative; outline:none; transition:all .25s ease;}
-    .theme-toggle input::after{
-      content:""; position:absolute; width:16px; height:16px; border-radius:50%;
-      background:#fff; top:2px; left:2px; box-shadow:0 2px 6px rgba(0,0,0,.25);
-      transition:transform .25s ease;
-    }
-    .theme-toggle input:checked{background:#4f46e5;}
-    .theme-toggle input:checked::after{transform:translateX(16px);}
 
-    /* ================= LAYOUT & CARDS ================= */
     .grid{display:grid; grid-template-columns: 1.3fr .7fr; gap:18px; padding:18px;}
     @media (max-width:960px){ .grid{grid-template-columns:1fr} }
 
@@ -135,7 +80,7 @@
     }
     .icon{
       width:78px;height:78px;border-radius:18px;
-      background:linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,.08));
+      background:linear-gradient(180deg, var(--shine), rgba(255,255,255,.08));
       border:1px solid var(--border);
       display:flex;align-items:center;justify-content:center;
       font-size:40px; box-shadow: inset 0 12px 24px rgba(255,255,255,.15), inset 0 -10px 20px rgba(0,0,0,.15);
@@ -144,8 +89,11 @@
     .tempRow{display:flex;align-items:baseline;gap:10px}
     #temperature-value{
       font-size: clamp(44px, 9vw, 78px);
-      font-weight:800; line-height:1; letter-spacing:.4px;
-      text-shadow:0 2px 0 rgba(0,0,0,.18);
+      font-weight:800; line-height:1; text-shadow:0 2px 0 rgba(0,0,0,.28);
+      letter-spacing:.4px;
+      background: linear-gradient(180deg, #ffffff, #e8f0ff);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,.18));
     }
     .unit{font-weight:700;color:var(--muted)}
     .subtext{margin-top:4px;color:var(--muted);font-weight:600}
@@ -155,11 +103,11 @@
     .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .label{font-weight:700;color:var(--muted);display:flex;align-items:center;gap:8px}
 
-    /* วงกลมความชื้น */
+    /* Donut humidity */
     .donut{
       --p:0; width:132px;height:132px;border-radius:50%;
       background:
-        conic-gradient(var(--lineH) calc(var(--p)*1%), rgba(0,0,0,.08) 0),
+        conic-gradient(#9fcbff calc(var(--p)*1%), rgba(255,255,255,.12) 0),
         radial-gradient(closest-side, rgba(0,0,0,0) 70%, rgba(255,255,255,.25) 0);
       display:flex;align-items:center;justify-content:center;
       border:1px solid var(--border);
@@ -169,7 +117,7 @@
     .donut .num{font-size:36px;font-weight:800;text-shadow:0 2px 0 rgba(0,0,0,.25)}
     .donut small{color:var(--muted);font-weight:700;margin-left:4px}
 
-    /* สถานะ */
+    /* Status chip */
     #status-message{
       text-align:center; color:#0b1633; background:rgba(255,255,255,.95);
       border:1px solid rgba(255,255,255,.98); border-radius:12px; padding:10px 12px; font-weight:600;
@@ -177,32 +125,25 @@
       min-width:220px;
     }
 
-    /* กราฟ */
+    /* Chart panel */
     .chart-panel{grid-column:1 / -1;}
     .chart-wrap{height:270px; position:relative; border-radius:18px; overflow:hidden}
     canvas{width:100%; height:100%; display:block; filter: drop-shadow(0 10px 22px rgba(0,0,0,.18));}
     .legend{
       position:absolute; top:10px; right:12px; font-size:12px; color:var(--muted); display:flex; gap:12px;
-      background:rgba(0,0,0,.12); padding:6px 10px; border-radius:999px; border:1px solid rgba(0,0,0,.08);
+      background:rgba(0,0,0,.18); padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.22);
       backdrop-filter: blur(6px);
     }
     .dot{width:10px;height:10px;border-radius:50%; box-shadow:0 0 0 2px rgba(255,255,255,.4) inset}
-    .t{background:var(--lineT)}
-    .h{background:var(--lineH)}
+    .t{background:#ffd1c1}
+    .h{background:#b7dcff}
   </style>
 </head>
 <body>
-  <!-- ชั้นพื้นหลังแอนิเมชัน -->
-  <div class="bg-anim"></div>
-
   <div class="board">
-    <!-- แถบบน: ลบข้อความเดิม และเพิ่มปุ่มเลือกธีม -->
     <div class="bar">
-      <label class="theme-toggle" title="Toggle Light/Dark">
-        <span>Light</span>
-        <input id="themeSwitch" type="checkbox" aria-label="Toggle theme">
-        <span>Dark</span>
-      </label>
+      <div class="place">Bangkok</div>
+      <div class="chip">24 ชม.</div>
     </div>
 
     <div class="grid">
@@ -234,7 +175,7 @@
         </div>
       </section>
 
-      <!-- กราฟเคลื่อนไหว -->
+      <!-- Animated chart -->
       <section class="panel chart-panel">
         <div class="chart-wrap">
           <canvas id="chart"></canvas>
@@ -248,7 +189,7 @@
   </div>
 
   <script>
-    /* ============== Logic เดิมคงไว้ทั้งหมด (Polling, กราฟ, โดนัท) ============== */
+    /* ===== ไม่แตะการทำงานหลัก เปลี่ยนเฉพาะหน้าตา ===== */
     const BACKEND_BASE = "https://dht11-2gtd.onrender.com";
 
     function setText(id, value){
@@ -256,6 +197,7 @@
       if (el) el.textContent = value;
     }
 
+    /* rolling history for chart (front-end only) */
     const MAX_POINTS = 60;
     const series = { t: [], h: [], ts: [] };
 
@@ -299,12 +241,9 @@
       const w = canvas.width, h = canvas.height;
       ctx.clearRect(0,0,w,h);
 
-      // Grid
+      /* grid */
       ctx.save();
-      ctx.strokeStyle = 'rgba(0,0,0,.12)';
-      if (document.body.getAttribute('data-theme') === 'dark') {
-        ctx.strokeStyle = 'rgba(255,255,255,.15)';
-      }
+      ctx.strokeStyle = 'rgba(255,255,255,.15)';
       ctx.lineWidth = 1;
       const gx = 8, gy = 5;
       for(let i=1;i<gx;i++){
@@ -334,10 +273,10 @@
 
       const sample = (arrFrom, arrTo, i) => lerp(arrFrom[i] ?? arrTo[i], arrTo[i], progress);
 
-      // temp
+      /* temperature */
       ctx.save();
       ctx.lineWidth = 3 * dpi;
-      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--lineT').trim();
+      ctx.strokeStyle = '#ffd1c1';
       ctx.beginPath();
       for (let i=0;i<N;i++){
         const x = xAt(i);
@@ -347,10 +286,10 @@
       ctx.stroke();
       ctx.restore();
 
-      // humidity
+      /* humidity */
       ctx.save();
       ctx.lineWidth = 3 * dpi;
-      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--lineH').trim();
+      ctx.strokeStyle = '#b7dcff';
       ctx.beginPath();
       for (let i=0;i<N;i++){
         const x = xAt(i);
@@ -399,20 +338,6 @@
 
     fetchData();
     setInterval(fetchData, 5000);
-
-    /* ================= THEME TOGGLER (ไม่ยุ่งกับระบบ fetch) ================= */
-    const switchEl = document.getElementById('themeSwitch');
-    // restore last theme
-    const saved = localStorage.getItem('theme') || 'dark';
-    document.body.setAttribute('data-theme', saved);
-    switchEl.checked = saved === 'dark';
-    switchEl.addEventListener('change', () => {
-      const theme = switchEl.checked ? 'dark' : 'light';
-      document.body.setAttribute('data-theme', theme);
-      localStorage.setItem('theme', theme);
-      // redraw grid color for canvas when theme changes
-      drawChart(1);
-    });
   </script>
 </body>
 </html>

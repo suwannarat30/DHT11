@@ -1,216 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temperature and Humidity Monitor</title>
-    <!-- Google Fonts for a fresh look -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root{
-            /* พาเลตต์ใหม่ */
-            --bg-1:#e9f3ff;
-            --bg-2:#f7e9ff;
-            --bg-3:#fff0e3;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Temperature and Humidity Monitor</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-1:#e9f3ff;
+      --bg-2:#f7e9ff;
+      --bg-3:#fff0e3;
 
-            --card-temp-start:#fff5f3;
-            --card-temp-end:#ffe9e5;
-            --card-temp-border:#ff8a7a;
+      --card-temp-start:#fff5f3;
+      --card-temp-end:#ffe9e5;
+      --card-temp-border:#ff8a7a;
 
-            --card-humi-start:#f3faff;
-            --card-humi-end:#e6f4ff;
-            --card-humi-border:#79b7ff;
+      --card-humi-start:#f3faff;
+      --card-humi-end:#e6f4ff;
+      --card-humi-border:#79b7ff;
 
-            --text-main:#1f2937;
-            --muted:#6b7280;
+      --text-main:#1f2937;
+      --muted:#6b7280;
 
-            --ring: 0 10px 25px rgba(0,0,0,.08);
-        }
+      --ring: 0 10px 25px rgba(0,0,0,.08);
+    }
 
-        /* พื้นหลังใหม่: ไล่เฉดนุ่ม ๆ สามโทน */
-        body {
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
-            color: var(--text-main);
-            background:
-                radial-gradient(1200px 800px at 10% 10%, var(--bg-1) 0%, transparent 60%),
-                radial-gradient(1100px 900px at 90% 20%, var(--bg-2) 0%, transparent 60%),
-                radial-gradient(1400px 1000px at 50% 100%, var(--bg-3) 0%, transparent 60%),
-                #f7f9fc;
-        }
+    body {
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      flex-direction: column;
+      color: var(--text-main);
+      background:
+        radial-gradient(1200px 800px at 10% 10%, var(--bg-1) 0%, transparent 60%),
+        radial-gradient(1100px 900px at 90% 20%, var(--bg-2) 0%, transparent 60%),
+        radial-gradient(1400px 1000px at 50% 100%, var(--bg-3) 0%, transparent 60%),
+        #f7f9fc;
+    }
 
-        .container {
-            display: flex;
-            gap: 28px;
-            justify-content: center;
-            align-items: center;
-            padding: 2.5em;
-        }
+    .container {
+      display: flex;
+      gap: 28px;
+      justify-content: center;
+      align-items: center;
+      padding: 2.5em;
+    }
 
-        /* การ์ด: glassy + ไล่เฉดตามประเภท */
-        .card {
-            text-align: center;
-            padding: 2.6em 3.6em;
-            background-color: rgba(255,255,255,0.65);
-            border-radius: 18px;
-            box-shadow: var(--ring);
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color .25s ease;
-            border: 2px solid rgba(255,255,255,0.6);
-            backdrop-filter: blur(10px);
-        }
-        .card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 18px 40px rgba(0,0,0,.12);
-        }
+    .card {
+      text-align: center;
+      padding: 2.6em 3.6em;
+      background-color: rgba(255,255,255,0.65);
+      border-radius: 18px;
+      box-shadow: var(--ring);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color .25s ease;
+      border: 2px solid rgba(255,255,255,0.6);
+      backdrop-filter: blur(10px);
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 40px rgba(0,0,0,.12);
+    }
 
-        /* ไล่เฉดสีการ์ดตามลำดับ (ใบแรก=Temp, ใบสอง=Humidity) */
-        .container .card:nth-child(1){
-            background-image: linear-gradient(160deg, var(--card-temp-start), var(--card-temp-end));
-            border-color: color-mix(in oklab, var(--card-temp-border) 35%, #ffffff 65%);
-        }
-        .container .card:nth-child(1):hover{
-            box-shadow: 0 18px 40px rgba(231, 76, 60, .18);
-        }
-        .container .card:nth-child(2){
-            background-image: linear-gradient(160deg, var(--card-humi-start), var(--card-humi-end));
-            border-color: color-mix(in oklab, var(--card-humi-border) 35%, #ffffff 65%);
-        }
-        .container .card:nth-child(2):hover{
-            box-shadow: 0 18px 40px rgba(52, 152, 219, .18);
-        }
+    .container .card:nth-child(1){
+      background-image: linear-gradient(160deg, var(--card-temp-start), var(--card-temp-end));
+      border-color: color-mix(in oklab, var(--card-temp-border) 35%, #ffffff 65%);
+    }
+    .container .card:nth-child(1):hover{
+      box-shadow: 0 18px 40px rgba(231, 76, 60, .18);
+    }
+    .container .card:nth-child(2){
+      background-image: linear-gradient(160deg, var(--card-humi-start), var(--card-humi-end));
+      border-color: color-mix(in oklab, var(--card-humi-border) 35%, #ffffff 65%);
+    }
+    .container .card:nth-child(2):hover{
+      box-shadow: 0 18px 40px rgba(52, 152, 219, .18);
+    }
 
-        h1 {
-            color: #0f172a;
-            margin-bottom: 16px;
-            font-weight: 700;
-            letter-spacing: 0.2px;
-        }
+    h1 {
+      color: #0f172a;
+      margin-bottom: 16px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
 
-        .label {
-            font-size: 1.08em;
-            font-weight: 600;
-            color: var(--muted);
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            opacity: .9;
-        }
+    .label {
+      font-size: 1.08em;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      opacity: .9;
+    }
 
-        .value {
-            font-size: 4.6em;
-            font-weight: 700;
-            margin: 0;
-            line-height: 1;
-            letter-spacing: -1px;
-            text-shadow: 0 1px 0 rgba(255,255,255,.6);
-        }
-        .unit {
-            font-size: 1.1em;
-            color: #8a94a6;
-            margin-top: 6px;
-            display: block;
-            font-weight: 600;
-        }
+    .value {
+      font-size: 4.6em;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1;
+      letter-spacing: -1px;
+      text-shadow: 0 1px 0 rgba(255,255,255,.6);
+    }
+    .unit {
+      font-size: 1.1em;
+      color: #8a94a6;
+      margin-top: 6px;
+      display: block;
+      font-weight: 600;
+    }
 
-        /* คงโทนสีค่าตัวเลข แต่ปรับให้สดขึ้นเล็กน้อย */
-        #temperature-value {
-            color: #e45745; /* เดิม #e74c3c */
-        }
-        #humidity-value {
-            color: #2f97de; /* เดิม #3498db */
-        }
+    #temperature-value {
+      color: #e45745;
+    }
+    #humidity-value {
+      color: #2f97de;
+    }
 
-        .status-message {
-            margin-top: 1.8em;
-            color: #334155;
-            font-size: 0.98em;
-            background: rgba(255,255,255,0.6);
-            padding: 10px 18px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.7);
-            box-shadow: 0 6px 16px rgba(0,0,0,.06);
-            backdrop-filter: blur(6px);
-        }
+    .status-message {
+      margin-top: 1.8em;
+      color: #334155;
+      font-size: 0.98em;
+      background: rgba(255,255,255,0.6);
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.7);
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+      backdrop-filter: blur(6px);
+    }
 
-        .emoji {
-            font-size: 1.15em;
-        }
+    .emoji {
+      font-size: 1.15em;
+    }
 
-        /* เล็กน้อยสำหรับจอเล็ก */
-        @media (max-width: 680px){
-            .container{flex-direction: column;}
-            .card{width: min(92vw, 520px);}
-            .value{font-size: 3.8em;}
-        }
-    </style>
+    @media (max-width: 680px){
+      .container{flex-direction: column;}
+      .card{width: min(92vw, 520px);}
+      .value{font-size: 3.8em;}
+    }
+  </style>
 </head>
 <body>
-    <h1>DHT11 Humitdity and Temperature Sensor</h1>
-    <div class="container">
-        <div class="card">
-            <div class="label">Temperature <span class="emoji">🌡️</span></div>
-            <div class="value" id="temperature-value">--</div>
-            <span class="unit">°C</span>
-        </div>
-        <div class="card">
-            <div class="label">Humidity <span class="emoji">💧</span></div>
-            <div class="value" id="humidity-value">--</div>
-            <span class="unit">%</span>
-        </div>
+  <h1>DHT11 Humidity and Temperature Sensor</h1>
+  <div class="container">
+    <div class="card">
+      <div class="label">Temperature <span class="emoji">🌡️</span></div>
+      <div class="value" id="temperature-value">--</div>
+      <span class="unit">°C</span>
     </div>
-    <div class="status-message" id="status-message">Connecting...</div>
+    <div class="card">
+      <div class="label">Humidity <span class="emoji">💧</span></div>
+      <div class="value" id="humidity-value">--</div>
+      <span class="unit">%</span>
+    </div>
+  </div>
+  <div class="status-message" id="status-message">Connecting...</div>
 
-    <script>
-        // Create WebSocket connection
-        const ws = new WebSocket('ws://localhost:3001');
+  <script>
+    // ===== ปรับ URL backend ตรงนี้ =====
+    // ตัวอย่างทดสอบใน LAN:
+    // const BACKEND_BASE = "http://192.168.1.50:3000";
+    // ถ้า deploy แล้ว (แนะนำ): ใช้ https://<your-backend-domain>
+    const BACKEND_BASE = "https://<your-backend-domain>";
 
-        // When connected
-        ws.onopen = () => {
-            console.log('Connected to WebSocket server');
-            document.getElementById('status-message').textContent = 'Connection successful';
-        };
+    async function fetchData() {
+      try {
+        const res = await fetch(`${BACKEND_BASE}/data`, { cache: "no-store" });
+        const data = await res.json();
+        console.log("Fetched:", data);
 
-        // When a message is received from the Backend
-        ws.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                console.log('Received data:', data);
+        if (data.temperature !== null) {
+          document.getElementById("temperature-value").textContent =
+            Number(data.temperature).toFixed(1);
+        }
+        if (data.humidity !== null) {
+          document.getElementById("humidity-value").textContent =
+            Number(data.humidity).toFixed(1);
+        }
+        document.getElementById("status-message").textContent = "Data updated ✅";
+      } catch (err) {
+        console.error("Fetch error:", err);
+        document.getElementById("status-message").textContent = "Error fetching data ⚠️";
+      }
+    }
 
-                // Check and update temperature value
-                if (data.temperature !== undefined) {
-                    document.getElementById('temperature-value').textContent = data.temperature.toFixed(1);
-                }
-
-                // Check and update humidity value
-                if (data.humidity !== undefined) {
-                    document.getElementById('humidity-value').textContent = data.humidity.toFixed(1);
-                }
-
-            } catch (error) {
-                console.error('Error parsing JSON:', error);
-            }
-        };
-
-        // When an error occurs
-        ws.onerror = (error) => {
-            console.error('WebSocket Error:', error);
-            document.getElementById('status-message').textContent = 'An error occurred during connection';
-        };
-
-        // When the connection is closed
-        ws.onclose = () => {
-            console.log('Disconnected from WebSocket server');
-            document.getElementById('status-message').textContent = 'Connection closed';
-        };
-    </script>
+    // เรียกครั้งแรก
+    fetchData();
+    // แล้วเรียกซ้ำทุก 5 วินาที
+    setInterval(fetchData, 5000);
+  </script>
 </body>
 </html>

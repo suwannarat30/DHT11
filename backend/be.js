@@ -1,36 +1,44 @@
+// backend/be.js  (Polling version — No WebSocket)
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-const WebSocket = require('ws'); // นำเข้าไลบรารี ws ทั้งหมด
 
 const app = express();
-const port = 3000;
+const PORT = process.env.PORT || 3000;
 
-// สร้าง WebSocket server
-const wss = new WebSocket.Server({ port: 3001 }); // ใช้ WebSocket.Server
+// อนุญาตเฉพาะ origin ที่ไว้ใจได้ (แก้เป็นโดเมนจริงของคุณด้วย)
+const ALLOW_ORIGINS = new Set([
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'https://dht-11-mkzt.vercel.app',   // Vercel frontend ของคุณ
+]);
 
-app.use(cors()); // อนุญาตการเข้าถึงจาก Frontend
-app.use(bodyParser.json()); // ใช้เพียงครั้งเดียวเท่านั้น
+app.use(cors({
+  origin: (origin, cb) => cb(null, !origin || ALLOW_ORIGINS.has(origin)),
+}));
 
-// HTTP endpoint สำหรับรับข้อมูลจาก ESP32
+app.use(express.json()); // ไม่ต้อง body-parser แล้ว
+
+// เก็บค่าล่าสุดไว้ในหน่วยความจำ
+let latest = { temperature: null, humidity: null, at: null };
+
+// ESP32 จะ POST มาที่นี่
 app.post('/temperature', (req, res) => {
-  const data = req.body;
-  console.log('Received:', data);
-
-  // ส่งข้อมูลไปยังทุก client ที่เชื่อมต่อผ่าน WebSocket
-  wss.clients.forEach(client => {
-    if (client.readyState === WebSocket.OPEN) { // เปลี่ยนเป็น WebSocket.OPEN
-      client.send(JSON.stringify(data));
-    }
-  });
-
-  res.send('OK');
+  const { temperature, humidity } = req.body || {};
+  if (typeof temperature !== 'number' || typeof humidity !== 'number') {
+    return res.status(400).json({ error: 'Invalid payload: need number temperature & humidity' });
+  }
+  latest = { temperature, humidity, at: Date.now() };
+  console.log('Received:', latest);
+  res.json({ ok: true });
 });
 
-app.listen(port, () => {
-  console.log(`Backend listening on port ${port}`);
+// Frontend ดึงค่าล่าสุดจากตรงนี้ (Polling)
+app.get('/data', (_req, res) => {
+  res.json(latest);
 });
 
-wss.on('listening', () => {
-  console.log('WebSocket server listening on port 3001');
-});
+// Health check
+app.get('/health', (_req, res) => res.send('ok'));
+
+app.listen(PORT, () => console.log(`Backend listening on ${PORT}`));

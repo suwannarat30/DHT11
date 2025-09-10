@@ -4,9 +4,9 @@
 #include "esp_wifi.h"   // <-- ใช้ตั้งประเทศแทน WiFi.setCountry()
 
 // ======= USER CONFIG =======
-#define WIFI_SSID   "Rapee"          // ชื่อ Wi-Fi 2.4GHz
-#define WIFI_PASS   "123456789"        // รหัสผ่าน
-#define BACKEND_URL "http://172.20.10.4:3000/temperature"  // IP พีซีที่รัน backend
+#define WIFI_SSID   "Areena"          // ชื่อ Wi-Fi 2.4GHz
+#define WIFI_PASS   "12345678"        // รหัสผ่าน
+#define BACKEND_URL "http://172.20.10.7:3000/temperature"  // IP พีซีที่รัน backend
 #define DHTPIN      4
 #define DHTTYPE     DHT11
 #define POST_INTERVAL_MS       5000

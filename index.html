@@ -8,9 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ================= THEME TOKENS (ไม่กระทบ logic) ================= */
+    /* ================= THEME TOKENS ================= */
     :root{
-      /* Light (default) */
+      /* Light (default): พื้นสว่าง ตัวอักษรเข้ม */
       --bg1:#e9f0ff;
       --bg2:#cfe3ff;
       --bg3:#9dd1ff;
@@ -18,28 +18,37 @@
       --muted:rgba(15,23,42,.75);
       --panel:rgba(255,255,255,.75);
       --panel-2:rgba(255,255,255,.82);
-      --border:rgba(15,23,42,.08);
+      --border:rgba(15,23,42,.10);
       --shadow:0 18px 46px rgba(15,23,42,.18);
-      --lineT:#ffb8a1;
-      --lineH:#8ec9ff;
+      --lineT:#ff9f83;   /* temp line */
+      --lineH:#66b9ff;   /* humidity line */
+      --statusText:#0b1633; /* สีข้อความในการ์ดสถานะ */
+      --statusBg:rgba(255,255,255,.95);
+      --statusBorder:rgba(255,255,255,.98);
+      --gridLight:rgba(0,0,0,.12);
+      --gridDark:rgba(255,255,255,.15); /* ใช้เมื่อ theme=dark */
     }
     [data-theme="dark"]{
-      --bg1:#143a89;
-      --bg2:#3858b3;
-      --bg3:#6aa6da;
+      /* Dark: พื้นหลังโทนดำ/น้ำเงินเข้ม ตัวอักษรสว่าง */
+      --bg1:#0b1220;   /* โทนดำน้ำเงิน */
+      --bg2:#111827;
+      --bg3:#1f2937;
       --text:#f3f7fd;
-      --muted:rgba(255,255,255,.85);
-      --panel:rgba(255,255,255,.14);
-      --panel-2:rgba(255,255,255,.18);
-      --border:rgba(255,255,255,.28);
-      --shadow:0 22px 50px rgba(10,25,60,.33);
+      --muted:rgba(255,255,255,.82);
+      --panel:rgba(255,255,255,.08);
+      --panel-2:rgba(255,255,255,.10);
+      --border:rgba(255,255,255,.16);
+      --shadow:0 22px 50px rgba(0,0,0,.6);
       --lineT:#ffd1c1;
       --lineH:#b7dcff;
+      --statusText:#0e1726;  /* ตัวอักษรในกล่องสถานะตอนพื้นสว่าง */
+      --statusBg:rgba(255,255,255,.95);
+      --statusBorder:rgba(255,255,255,.98);
     }
 
     *{box-sizing:border-box}
 
-    /* ================= BACKGROUND ANIMATION (ชั้นหลังสุด) ================= */
+    /* ================= BACKGROUND ANIMATION ================= */
     body{
       margin:0; min-height:100vh;
       color:var(--text);
@@ -48,7 +57,6 @@
       position:relative; overflow:hidden;
       background: radial-gradient(1200px 900px at 85% -10%, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 60%);
     }
-    /* ชั้น effect เคลื่อนไหวแบบละมุน */
     .bg-anim, .bg-anim::before, .bg-anim::after{
       position:fixed; inset:-20%;
       pointer-events:none; z-index:-2; content:"";
@@ -56,21 +64,23 @@
       transform: translateZ(0);
     }
     .bg-anim{
-      background: radial-gradient(600px 600px at 20% 15%, var(--bg1), transparent 55%),
-                  radial-gradient(700px 700px at 80% 10%, var(--bg2), transparent 60%),
-                  radial-gradient(800px 800px at 50% 95%, var(--bg3), transparent 60%);
+      background:
+        radial-gradient(600px 600px at 20% 15%, var(--bg1), transparent 55%),
+        radial-gradient(700px 700px at 80% 10%, var(--bg2), transparent 60%),
+        radial-gradient(800px 800px at 50% 95%, var(--bg3), transparent 60%);
       animation: drift1 28s ease-in-out infinite alternate;
     }
     .bg-anim::before{
-      background: radial-gradient(500px 500px at 10% 80%, var(--bg2), transparent 55%),
-                  radial-gradient(600px 600px at 90% 75%, var(--bg1), transparent 60%);
+      background:
+        radial-gradient(520px 520px at 10% 80%, var(--bg2), transparent 55%),
+        radial-gradient(640px 640px at 90% 75%, var(--bg1), transparent 60%);
       animation: drift2 36s ease-in-out infinite alternate;
-      opacity:.8;
+      opacity:.85;
     }
     .bg-anim::after{
-      background: radial-gradient(700px 700px at 50% 50%, rgba(255,255,255,.25), transparent 70%);
+      background: radial-gradient(740px 740px at 50% 50%, rgba(255,255,255,.25), transparent 70%);
       animation: pulse 14s ease-in-out infinite alternate;
-      opacity:.35;
+      opacity:.28;
     }
     @keyframes drift1{
       0%{transform:translate3d(-2%, -2%, 0) scale(1);}
@@ -94,11 +104,11 @@
       position:relative;
     }
 
-    /* ======= Top bar: เอาข้อความเดิมออกและใส่ปุ่มสลับธีมแทน ======= */
+    /* ======= Top bar: ปุ่มสลับธีม ======= */
     .bar{
       display:flex; align-items:center; justify-content:flex-end;
-      gap:10px; padding:14px 16px; border-bottom:1px solid rgba(0,0,0,.06);
-      background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0));
+      gap:10px; padding:14px 16px; border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0));
     }
     .theme-toggle{
       display:inline-flex; align-items:center; gap:8px;
@@ -159,7 +169,7 @@
     .donut{
       --p:0; width:132px;height:132px;border-radius:50%;
       background:
-        conic-gradient(var(--lineH) calc(var(--p)*1%), rgba(0,0,0,.08) 0),
+        conic-gradient(var(--lineH) calc(var(--p)*1%), rgba(0,0,0,.10) 0),
         radial-gradient(closest-side, rgba(0,0,0,0) 70%, rgba(255,255,255,.25) 0);
       display:flex;align-items:center;justify-content:center;
       border:1px solid var(--border);
@@ -171,8 +181,10 @@
 
     /* สถานะ */
     #status-message{
-      text-align:center; color:#0b1633; background:rgba(255,255,255,.95);
-      border:1px solid rgba(255,255,255,.98); border-radius:12px; padding:10px 12px; font-weight:600;
+      text-align:center; color:var(--statusText);
+      background:var(--statusBg);
+      border:1px solid var(--statusBorder);
+      border-radius:12px; padding:10px 12px; font-weight:600;
       box-shadow:0 10px 22px rgba(0,0,0,.18);
       min-width:220px;
     }
@@ -196,7 +208,7 @@
   <div class="bg-anim"></div>
 
   <div class="board">
-    <!-- แถบบน: ลบข้อความเดิม และเพิ่มปุ่มเลือกธีม -->
+    <!-- แถบบน: ปุ่มเลือกธีม -->
     <div class="bar">
       <label class="theme-toggle" title="Toggle Light/Dark">
         <span>Light</span>
@@ -299,12 +311,10 @@
       const w = canvas.width, h = canvas.height;
       ctx.clearRect(0,0,w,h);
 
-      // Grid
+      // Grid สีขึ้นกับธีม
       ctx.save();
-      ctx.strokeStyle = 'rgba(0,0,0,.12)';
-      if (document.body.getAttribute('data-theme') === 'dark') {
-        ctx.strokeStyle = 'rgba(255,255,255,.15)';
-      }
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+      ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue(isDark ? '--gridDark' : '--gridLight').trim();
       ctx.lineWidth = 1;
       const gx = 8, gy = 5;
       for(let i=1;i<gx;i++){
@@ -400,18 +410,16 @@
     fetchData();
     setInterval(fetchData, 5000);
 
-    /* ================= THEME TOGGLER (ไม่ยุ่งกับระบบ fetch) ================= */
+    /* ================= THEME TOGGLER ================= */
     const switchEl = document.getElementById('themeSwitch');
-    // restore last theme
-    const saved = localStorage.getItem('theme') || 'dark';
+    const saved = localStorage.getItem('theme') || 'dark';   // ค่าเริ่มต้นเป็น Dark
     document.body.setAttribute('data-theme', saved);
     switchEl.checked = saved === 'dark';
     switchEl.addEventListener('change', () => {
       const theme = switchEl.checked ? 'dark' : 'light';
       document.body.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
-      // redraw grid color for canvas when theme changes
-      drawChart(1);
+      drawChart(1); // ให้กราฟเปลี่ยนสีตารางตามธีมทันที
     });
   </script>
 </body>

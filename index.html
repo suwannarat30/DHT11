@@ -8,61 +8,38 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ======= Theme (iOS glass) — visual only, no logic changes ======= */
+    /* ======= Theme (iOS glass) ======= */
     :root{
       --text:#f3f7fd;
       --muted:rgba(255,255,255,.85);
       --panel:rgba(255,255,255,.14);
       --panel-2:rgba(255,255,255,.18);
       --border:rgba(255,255,255,.28);
-      --shadow:0 22px 50px rgba(10,25,60,.33);
-      --shine:rgba(255,255,255,.24);
+      --shadow:0 20px 46px rgba(10,25,60,.30);
     }
     *{box-sizing:border-box}
-
-    @keyframes bgShift{
-      0%{ background-position: 0% 0%, 0% 0%;}
-      50%{ background-position: 100% 50%, 50% 100%;}
-      100%{ background-position: 0% 0%, 0% 0%;}
-    }
     body{
       margin:0; min-height:100vh; color:var(--text);
       font-family:'Poppins',system-ui,Segoe UI,Arial,sans-serif;
       background:
-        radial-gradient(1100px 900px at 90% -10%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 60%),
-        linear-gradient(180deg, #153a89 0%, #3f66bf 55%, #6aa6da 100%);
-      background-size: 120% 120%, 100% 100%;
-      animation: bgShift 22s ease-in-out infinite;
+        radial-gradient(1100px 800px at 90% -10%, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 60%),
+        linear-gradient(180deg, #1d3f8f 0%, #3f66bf 55%, #6aa6da 100%);
       display:flex; align-items:center; justify-content:center; padding:20px;
     }
-
     .board{
       width:min(1080px,96vw);
       border-radius:28px; background:var(--panel);
-      backdrop-filter: blur(18px) saturate(125%); -webkit-backdrop-filter: blur(18px) saturate(125%);
+      backdrop-filter: blur(16px) saturate(120%); -webkit-backdrop-filter: blur(16px) saturate(120%);
       border:1px solid var(--border); box-shadow:var(--shadow); overflow:hidden;
-      position:relative;
     }
-    /* soft spotlight */
-    .board::before{
-      content:""; position:absolute; inset:-2px;
-      background: radial-gradient(900px 500px at 25% -10%, rgba(255,255,255,.18), transparent 60%);
-      pointer-events:none;
-    }
-
     .bar{
       display:flex; align-items:center; justify-content:space-between;
       padding:18px 22px; border-bottom:1px solid rgba(255,255,255,.12);
       background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0));
     }
-    .bar .place{font-weight:700; font-size:22px; letter-spacing:.2px; text-shadow:0 1px 0 rgba(0,0,0,.25)}
-    .bar .chip{
-      font-size:14px; font-weight:600; color:#18325e;
-      background:rgba(255,255,255,.95);
-      border:1px solid rgba(255,255,255,.98);
-      padding:6px 12px; border-radius:999px;
-      box-shadow:0 8px 18px rgba(0,0,0,.18);
-    }
+    .bar .place{font-weight:700; font-size:22px; letter-spacing:.2px}
+    .bar .chip{font-size:14px; font-weight:600; color:#19325e; background:rgba(255,255,255,.92);
+      border:1px solid rgba(255,255,255,.95); padding:6px 12px; border-radius:999px;}
 
     .grid{display:grid; grid-template-columns: 1.3fr .7fr; gap:18px; padding:18px;}
     @media (max-width:960px){ .grid{grid-template-columns:1fr} }
@@ -71,30 +48,17 @@
       background:var(--panel-2); border:1px solid var(--border); border-radius:22px;
       padding:20px; box-shadow:var(--shadow);
       display:grid; grid-template-columns: 96px 1fr; gap:16px; align-items:center;
-      position:relative; overflow:hidden;
-    }
-    .main::after{
-      content:""; position:absolute; inset:0;
-      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,0));
-      pointer-events:none;
     }
     .icon{
       width:78px;height:78px;border-radius:18px;
-      background:linear-gradient(180deg, var(--shine), rgba(255,255,255,.08));
+      background:linear-gradient(180deg, rgba(255,255,255,.24), rgba(255,255,255,.08));
       border:1px solid var(--border);
       display:flex;align-items:center;justify-content:center;
       font-size:40px; box-shadow: inset 0 12px 24px rgba(255,255,255,.15), inset 0 -10px 20px rgba(0,0,0,.15);
     }
     .tempBlock{display:flex;flex-direction:column}
     .tempRow{display:flex;align-items:baseline;gap:10px}
-    #temperature-value{
-      font-size: clamp(44px, 9vw, 78px);
-      font-weight:800; line-height:1; text-shadow:0 2px 0 rgba(0,0,0,.28);
-      letter-spacing:.4px;
-      background: linear-gradient(180deg, #ffffff, #e8f0ff);
-      -webkit-background-clip:text; background-clip:text; color:transparent;
-      filter: drop-shadow(0 6px 16px rgba(0,0,0,.18));
-    }
+    #temperature-value{font-size: clamp(44px, 9vw, 76px); font-weight:800; line-height:1; text-shadow:0 2px 0 rgba(0,0,0,.25)}
     .unit{font-weight:700;color:var(--muted)}
     .subtext{margin-top:4px;color:var(--muted);font-weight:600}
 
@@ -103,38 +67,36 @@
     .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .label{font-weight:700;color:var(--muted);display:flex;align-items:center;gap:8px}
 
-    /* Donut humidity */
+    /* วงกลมความชื้น */
     .donut{
-      --p:0; width:132px;height:132px;border-radius:50%;
+      --p:0; width:128px;height:128px;border-radius:50%;
       background:
-        conic-gradient(#9fcbff calc(var(--p)*1%), rgba(255,255,255,.12) 0),
+        conic-gradient(#a7d0ff calc(var(--p)*1%), rgba(255,255,255,.12) 0),
         radial-gradient(closest-side, rgba(0,0,0,0) 70%, rgba(255,255,255,.25) 0);
       display:flex;align-items:center;justify-content:center;
       border:1px solid var(--border);
-      box-shadow: inset 0 12px 26px rgba(255,255,255,.12), inset 0 -14px 24px rgba(0,0,0,.16);
-      transition: background .7s cubic-bezier(.2,.7,.2,1);
+      box-shadow: inset 0 10px 24px rgba(255,255,255,.12), inset 0 -12px 22px rgba(0,0,0,.15);
+      transition: background .7s ease;
     }
-    .donut .num{font-size:36px;font-weight:800;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+    .donut .num{font-size:34px;font-weight:800;text-shadow:0 2px 0 rgba(0,0,0,.25)}
     .donut small{color:var(--muted);font-weight:700;margin-left:4px}
 
-    /* Status chip */
+    /* สถานะ */
     #status-message{
-      text-align:center; color:#0b1633; background:rgba(255,255,255,.95);
-      border:1px solid rgba(255,255,255,.98); border-radius:12px; padding:10px 12px; font-weight:600;
+      text-align:center; color:#0b1633; background:rgba(255,255,255,.92);
+      border:1px solid rgba(255,255,255,.95); border-radius:12px; padding:10px 12px; font-weight:600;
       box-shadow:0 10px 22px rgba(0,0,0,.18);
-      min-width:220px;
     }
 
-    /* Chart panel */
+    /* แผงกราฟ */
     .chart-panel{grid-column:1 / -1;}
-    .chart-wrap{height:270px; position:relative; border-radius:18px; overflow:hidden}
-    canvas{width:100%; height:100%; display:block; filter: drop-shadow(0 10px 22px rgba(0,0,0,.18));}
+    .chart-wrap{height:260px; position:relative}
+    canvas{width:100%; height:100%; display:block}
     .legend{
       position:absolute; top:10px; right:12px; font-size:12px; color:var(--muted); display:flex; gap:12px;
-      background:rgba(0,0,0,.18); padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.22);
-      backdrop-filter: blur(6px);
+      background:rgba(0,0,0,.15); padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.2)
     }
-    .dot{width:10px;height:10px;border-radius:50%; box-shadow:0 0 0 2px rgba(255,255,255,.4) inset}
+    .dot{width:10px;height:10px;border-radius:50%;}
     .t{background:#ffd1c1}
     .h{background:#b7dcff}
   </style>
@@ -175,7 +137,7 @@
         </div>
       </section>
 
-      <!-- Animated chart -->
+      <!-- กราฟเคลื่อนไหว -->
       <section class="panel chart-panel">
         <div class="chart-wrap">
           <canvas id="chart"></canvas>
@@ -197,10 +159,15 @@
       if (el) el.textContent = value;
     }
 
-    /* rolling history for chart (front-end only) */
-    const MAX_POINTS = 60;
-    const series = { t: [], h: [], ts: [] };
+    // ===== rolling history for chart (front-end only) =====
+    const MAX_POINTS = 60; // เก็บ ~5 นาที ถ้า poll ทุก 5 วิ
+    const series = {
+      t: [], // temperature
+      h: [], // humidity
+      ts: [] // timestamps (ms)
+    };
 
+    // Canvas setup
     const canvas = document.getElementById('chart');
     const ctx = canvas.getContext('2d');
     let dpi = 1;
@@ -210,11 +177,12 @@
       dpi = window.devicePixelRatio || 1;
       canvas.width = Math.round(rect.width * dpi);
       canvas.height = Math.round(rect.height * dpi);
-      drawChart(1);
+      drawChart(1); // redraw
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
+    // Helpers for chart
     function lerp(a,b,t){ return a + (b-a)*t; }
     function niceRange(min, max){
       if (min === max) { min -= 1; max += 1; }
@@ -222,6 +190,7 @@
       return [Math.floor(min - pad), Math.ceil(max + pad)];
     }
 
+    // Animated draw (progress 0..1)
     let anim = { fromT:[], toT:[], fromH:[], toH:[], start:0, dur:800 };
     function scheduleAnimation() {
       anim.fromT = anim.toT.slice();
@@ -241,7 +210,7 @@
       const w = canvas.width, h = canvas.height;
       ctx.clearRect(0,0,w,h);
 
-      /* grid */
+      // Grid
       ctx.save();
       ctx.strokeStyle = 'rgba(255,255,255,.15)';
       ctx.lineWidth = 1;
@@ -258,6 +227,7 @@
 
       if (series.t.length < 2) return;
 
+      // Axis mapping
       const minT = Math.min(...series.t), maxT = Math.max(...series.t);
       const minH = Math.min(...series.h), maxH = Math.max(...series.h);
       const [yMinT,yMaxT] = niceRange(minT, maxT);
@@ -267,13 +237,18 @@
       const pad = 16 * dpi;
       const plotW = w - pad*2;
       const plotH = h - pad*2;
-      const xAt = i => pad + (i/(N-1))*plotW;
-      const yAtT = v => pad + (1 - (v - yMinT)/(yMaxT - yMinT))*plotH;
-      const yAtH = v => pad + (1 - (v - yMinH)/(yMaxH - yMinH))*plotH;
+      function xAt(i){ return pad + (i/(N-1))*plotW; }
+      function yAtT(v){ return pad + (1 - (v - yMinT)/(yMaxT - yMinT))*plotH; }
+      function yAtH(v){ return pad + (1 - (v - yMinH)/(yMaxH - yMinH))*plotH; }
 
-      const sample = (arrFrom, arrTo, i) => lerp(arrFrom[i] ?? arrTo[i], arrTo[i], progress);
+      // Interpolated samples
+      function sample(arrFrom, arrTo, i){
+        const a = arrFrom[i] ?? arrTo[i];
+        const b = arrTo[i];
+        return lerp(a, b, progress);
+      }
 
-      /* temperature */
+      // Draw temperature line (peach)
       ctx.save();
       ctx.lineWidth = 3 * dpi;
       ctx.strokeStyle = '#ffd1c1';
@@ -286,7 +261,7 @@
       ctx.stroke();
       ctx.restore();
 
-      /* humidity */
+      // Draw humidity line (light blue)
       ctx.save();
       ctx.lineWidth = 3 * dpi;
       ctx.strokeStyle = '#b7dcff';
@@ -300,17 +275,20 @@
       ctx.restore();
     }
 
+    // Update series with new point
     function pushPoint(temp, hum){
       const now = Date.now();
       series.t.push(Number(temp));
       series.h.push(Number(hum));
       series.ts.push(now);
+
       if (series.t.length > MAX_POINTS){
         series.t.shift(); series.h.shift(); series.ts.shift();
       }
       scheduleAnimation();
     }
 
+    // ===== polling (unchanged endpoints) =====
     async function fetchData() {
       try {
         const res = await fetch(`${BACKEND_BASE}/data`, { cache: "no-store" });
